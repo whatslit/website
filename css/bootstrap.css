@@ -6,6 +6,194 @@
 
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 
+/* 
+
+Define this in your CSS 
+.bgColor = Replace it by the name you want to give your animation
+.bgAnimObj = Assign this class to the object you want to apply the effect
+*/
+
+.bgAnimObj {
+    background: #1abc9c;
+    -webkit-animation: bgColor 5s;
+    /* Chrome, Safari */
+    -moz-animation: bgColor 5s;
+    /* Firefox */
+    -o-animation: bgColor 5s;
+    /* Opera */
+    animation: bgColor 5s;
+}
+/* 
+
+Define the keyframe and changes
+
+*/
+
+/* Chrome, Safari */
+
+@-webkit-keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}
+/* Firefox */
+
+@-moz-keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}
+/* Opera */
+
+@-o-keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}
+/* Standard syntax */
+
+@keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}/* 
+
+Define this in your CSS 
+.bgColor = Replace it by the name you want to give your animation
+.bgAnimObj = Assign this class to the object you want to apply the effect
+*/
+
+.bgAnimObj {
+    background: #1abc9c;
+    -webkit-animation: bgColor 5s;
+    /* Chrome, Safari */
+    -moz-animation: bgColor 5s;
+    /* Firefox */
+    -o-animation: bgColor 5s;
+    /* Opera */
+    animation: bgColor 5s;
+}
+/* 
+
+Define the keyframe and changes
+
+*/
+
+/* Chrome, Safari */
+
+@-webkit-keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}
+/* Firefox */
+
+@-moz-keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}
+/* Opera */
+
+@-o-keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}
+/* Standard syntax */
+
+@keyframes bgColor {
+    from {
+        background: #1abc9c;
+    }
+    to {
+        background: #ebebeb;
+    }
+}/* 
+
+Define this in your CSS 
+.bgColor = Replace it by the name you want to give your animation
+.bgAnimObj = Assign this class to the object you want to apply the effect
+*/
+
+.jumbotron {
+    background: #eee;
+    -webkit-animation: bgColor 5s;
+    /* Chrome, Safari */
+    -moz-animation: bgColor 5s;
+    /* Firefox */
+    -o-animation: bgColor 5s;
+    /* Opera */
+    animation: bgColor 5s;
+}
+/* 
+
+Define the keyframe and changes
+
+*/
+
+/* Chrome, Safari */
+
+@-webkit-keyframes bgColor {
+    from {
+        background: #eee;
+    }
+    to {
+        background: #FFFFFF;
+    }
+}
+/* Firefox */
+
+@-moz-keyframes bgColor {
+    from {
+        background: #eee;
+    }
+    to {
+        background: #FFFFFF;
+    }
+}
+/* Opera */
+
+@-o-keyframes bgColor {
+    from {
+        background: #eee;
+    }
+    to {
+        background: #FFFFFF;
+    }
+}
+/* Standard syntax */
+
+@keyframes bgColor {
+    from {
+        background: #eee;
+    }
+    to {
+        background: #FFFFFF;
+    }
+}
+
 html {
   font-family: sans-serif;
   -webkit-text-size-adjust: 100%;
