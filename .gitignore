@@ -8,4 +8,6 @@ common-tmp
 /docs/build
 .node_modules-tmp
 .bower_components-tmp
+/bower_components
+bower_components
 /coverage
