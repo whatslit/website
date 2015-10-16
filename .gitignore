@@ -11,3 +11,4 @@ common-tmp
 /bower_components
 bower_components
 /coverage
+.fuse*
