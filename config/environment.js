@@ -38,9 +38,13 @@ module.exports = function(environment) {
 
     ENV.APP.rootElement = '#ember-testing';
   }
+if (environment === 'development') {
+    ENV.APP.API_HOST = 'http://192.168.1.7:5000';
+  }
+
 
   if (environment === 'production') {
-
+    ENV.APP.API_HOST = 'http://api.whatslit.io';
   }
 
   return ENV;

@@ -110,9 +110,30 @@ define('whatslit/router', ['exports', 'ember', 'whatslit/config/environment'], f
     location: config['default'].locationType
   });
 
-  Router.map(function () {});
+  Router.map(function () {
+    this.route('/');
+    this.route('login');
+  });
 
   exports['default'] = Router;
+
+});
+define('whatslit/routes/index', ['exports', 'ember'], function (exports, Ember) {
+
+  'use strict';
+
+  exports['default'] = Ember['default'].Route.extend({
+    model: function model() {
+      return ['red', 'green', 'blue'];
+    }
+  });
+
+});
+define('whatslit/routes/login', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Route.extend({});
 
 });
 define('whatslit/templates/application', ['exports'], function (exports) {
@@ -130,8 +151,8 @@ define('whatslit/templates/application', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 1,
-            "column": 36
+            "line": 3,
+            "column": 10
           }
         },
         "moduleName": "whatslit/templates/application.hbs"
@@ -146,11 +167,208 @@ define('whatslit/templates/application', ['exports'], function (exports) {
         var el2 = dom.createTextNode("Welcome to Ember");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
         return el0;
       },
-      buildRenderNodes: function buildRenderNodes() { return []; },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment,2,2,contextualElement);
+        dom.insertBoundary(fragment, null);
+        return morphs;
+      },
       statements: [
+        ["content","outlet",["loc",[null,[3,0],[3,10]]]]
+      ],
+      locals: [],
+      templates: []
+    };
+  }()));
 
+});
+define('whatslit/templates/index', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 2,
+              "column": 1
+            },
+            "end": {
+              "line": 4,
+              "column": 1
+            }
+          },
+          "moduleName": "whatslit/templates/index.hbs"
+        },
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("		");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("li");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","color",["loc",[null,[3,6],[3,15]]]]
+        ],
+        locals: ["color"],
+        templates: []
+      };
+    }());
+    var child1 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 7,
+              "column": 0
+            },
+            "end": {
+              "line": 7,
+              "column": 31
+            }
+          },
+          "moduleName": "whatslit/templates/index.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("Go to Login");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() { return []; },
+        statements: [
+
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    return {
+      meta: {
+        "revision": "Ember@1.13.7",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 10,
+            "column": 0
+          }
+        },
+        "moduleName": "whatslit/templates/index.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("ul");
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(3);
+        morphs[0] = dom.createMorphAt(dom.childAt(fragment, [0]),1,1);
+        morphs[1] = dom.createMorphAt(fragment,2,2,contextualElement);
+        morphs[2] = dom.createMorphAt(fragment,4,4,contextualElement);
+        return morphs;
+      },
+      statements: [
+        ["block","each",[["get","model",["loc",[null,[2,9],[2,14]]]]],[],0,null,["loc",[null,[2,1],[4,10]]]],
+        ["block","link-to",["login"],[],1,null,["loc",[null,[7,0],[7,43]]]],
+        ["content","outlet",["loc",[null,[9,0],[9,10]]]]
+      ],
+      locals: [],
+      templates: [child0, child1]
+    };
+  }()));
+
+});
+define('whatslit/templates/login', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    return {
+      meta: {
+        "revision": "Ember@1.13.7",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 5,
+            "column": 0
+          }
+        },
+        "moduleName": "whatslit/templates/login.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createTextNode("Anal fudge cakes.\n\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+        return morphs;
+      },
+      statements: [
+        ["content","outlet",["loc",[null,[4,0],[4,10]]]]
       ],
       locals: [],
       templates: []
@@ -231,7 +449,27 @@ define('whatslit/tests/router.jshint', function () {
 
   QUnit.module('JSHint - .');
   QUnit.test('router.js should pass jshint', function(assert) { 
-    assert.ok(false, 'router.js should pass jshint.\nrouter.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 11, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+    assert.ok(false, 'router.js should pass jshint.\nrouter.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 13, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/routes/index.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - routes');
+  QUnit.test('routes/index.js should pass jshint', function(assert) { 
+    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\nroutes/index.js: line 4, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/routes/login.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - routes');
+  QUnit.test('routes/login.js should pass jshint', function(assert) { 
+    assert.ok(false, 'routes/login.js should pass jshint.\nroutes/login.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/login.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
   });
 
 });
@@ -249,6 +487,81 @@ define('whatslit/tests/test-helper.jshint', function () {
   QUnit.module('JSHint - .');
   QUnit.test('test-helper.js should pass jshint', function(assert) { 
     assert.ok(true, 'test-helper.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/routes/index-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:index', 'Unit | Route | index', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('whatslit/tests/unit/routes/index-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/routes');
+  QUnit.test('unit/routes/index-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/routes/index-test.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/routes/login-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:login', 'Unit | Route | login', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('whatslit/tests/unit/routes/login-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/routes');
+  QUnit.test('unit/routes/login-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/routes/login-test.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/routes/test-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:test', 'Unit | Route | test', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('whatslit/tests/unit/routes/test-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/routes');
+  QUnit.test('unit/routes/test-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/routes/test-test.js should pass jshint.'); 
   });
 
 });
@@ -280,7 +593,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"name":"whatslit","version":"0.0.0+97d1e328"});
+  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+84a039e6"});
 }
 
 /* jshint ignore:end */
