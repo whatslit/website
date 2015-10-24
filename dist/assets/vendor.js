@@ -86754,6 +86754,360 @@ define('ember-cli-content-security-policy', ['ember-cli-content-security-policy/
   }));
 });
 
+define('ember-django-adapter/adapters/drf', ['exports', 'ember-data', 'ember'], function (exports, DS, Ember) {
+
+  'use strict';
+
+  var ERROR_MESSAGES = {
+    401: 'Unauthorized',
+    500: 'Internal Server Error'
+  };
+
+  /**
+   * The Django REST Framework adapter allows your store to communicate
+   * with Django REST Framework-built APIs by adjusting the JSON and URL
+   * structure implemented by Ember Data to match that of DRF.
+   *
+   * The source code for the RESTAdapter superclass can be found at:
+   * https://github.com/emberjs/data/blob/master/packages/ember-data/lib/adapters/rest_adapter.js
+   *
+   * @class DRFAdapter
+   * @constructor
+   * @extends DS.RESTAdapter
+   */
+  exports['default'] = DS['default'].RESTAdapter.extend({
+    defaultSerializer: "DS/djangoREST",
+    addTrailingSlashes: true,
+    nonFieldErrorsKey: 'non_field_errors',
+
+    /**
+     * Determine the pathname for a given type.
+     *
+     * @method pathForType
+     * @param {String} type
+     * @return {String} path
+     */
+    pathForType: function pathForType(type) {
+      var dasherized = Ember['default'].String.dasherize(type);
+      return Ember['default'].String.pluralize(dasherized);
+    },
+
+    /**
+      Builds a URL for a given model name and optional ID.
+       By default, it pluralizes the type's name (for example, 'post'
+      becomes 'posts' and 'person' becomes 'people').
+       If an ID is specified, it adds the ID to the path generated
+      for the type, separated by a `/`.
+       If the adapter has the property `addTrailingSlashes` set to
+      true, a trailing slash will be appended to the result.
+       @method buildURL
+      @param {String} modelName
+      @param {(String|Array|Object)} id single id or array of ids or query
+      @param {(DS.Snapshot|Array)} snapshot single snapshot or array of snapshots
+      @param {String} requestType
+      @param {Object} query object of query parameters to send for query requests.
+      @return {String} url
+    */
+    buildURL: function buildURL(modelName, id, snapshot, requestType, query) {
+      var url = this._super(modelName, id, snapshot, requestType, query);
+      if (this.get('addTrailingSlashes')) {
+        if (url.charAt(url.length - 1) !== '/') {
+          url += '/';
+        }
+      }
+      return url;
+    },
+
+    /**
+      Takes an ajax response, and returns the json payload or an error.
+       By default this hook just returns the json payload passed to it.
+      You might want to override it in two cases:
+       1. Your API might return useful results in the response headers.
+      Response headers are passed in as the second argument.
+       2. Your API might return errors as successful responses with status code
+      200 and an Errors text or object. You can return a `DS.InvalidError` or a
+      `DS.AdapterError` (or a sub class) from this hook and it will automatically
+      reject the promise and put your record into the invalid or error state.
+       Returning a `DS.InvalidError` from this method will cause the
+      record to transition into the `invalid` state and make the
+      `errors` object available on the record. When returning an
+      `DS.InvalidError` the store will attempt to normalize the error data
+      returned from the server using the serializer's `extractErrors`
+      method.
+       @method handleResponse
+      @param  {Number} status
+      @param  {Object} headers
+      @param  {Object} payload
+      @return {Object | DS.AdapterError} response
+    */
+    handleResponse: function handleResponse(status, headers, payload) {
+      if (this.isSuccess(status, headers, payload)) {
+        return payload;
+      } else if (this.isInvalid(status, headers, payload)) {
+        return new DS['default'].InvalidError(this._drfToJsonAPIValidationErrors(payload));
+      }
+
+      if (Object.getOwnPropertyNames(payload).length === 0) {
+        payload = '';
+      } else if (payload.detail) {
+        payload = payload.detail;
+      }
+      var errors = this.normalizeErrorResponse(status, headers, payload);
+
+      if (ERROR_MESSAGES[status]) {
+        return new DS['default'].AdapterError(errors, ERROR_MESSAGES[status]);
+      }
+      return new DS['default'].AdapterError(errors);
+    },
+
+    isInvalid: function isInvalid(status) {
+      return status === 400;
+    },
+
+    /**
+      Convert validation errors to a JSON API object.
+       Non-field errors are converted to an object that points at /data.  Field-
+      specific errors are converted to an object that points at the respective
+      attribute.  Nested field-specific errors are converted to an object that
+      include a slash-delimited pointer to the nested attribute.
+       NOTE: Because JSON API does not technically support nested resource objects
+            at this time, any nested errors are literally "in name" only.  The
+            error object will be attached to the parent resource and the nested
+            object's isValid property will continue to be true.
+       @method _drfToJsonAPIValidationErrors
+      @param {Object} payload
+      @param {String} keyPrefix Used to recursively process nested errors
+      @return {Array} A list of JSON API compliant error objects
+    */
+    _drfToJsonAPIValidationErrors: function _drfToJsonAPIValidationErrors(payload) {
+      var _this = this;
+
+      var keyPrefix = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+      var out = [];
+
+      var _loop = function (key) {
+        if (payload.hasOwnProperty(key)) {
+          if (Ember['default'].isArray(payload[key])) {
+            payload[key].forEach(function (error) {
+              if (key === _this.get('nonFieldErrorsKey')) {
+                out.push({
+                  source: { pointer: '/data' },
+                  detail: error,
+                  title: 'Validation Error'
+                });
+              } else {
+                out.push({
+                  source: { pointer: '/data/attributes/' + keyPrefix + key },
+                  detail: error,
+                  title: 'Invalid Attribute'
+                });
+              }
+            });
+          } else {
+            out = out.concat(_this._drfToJsonAPIValidationErrors(payload[key], '' + keyPrefix + key + '/'));
+          }
+        }
+      };
+
+      for (var key in payload) {
+        _loop(key);
+      }
+      return out;
+    },
+
+    /**
+     * This is used by RESTAdapter.groupRecordsForFindMany.
+     *
+     * The original implementation does not handle trailing slashes well.
+     * Additionally, it is a complex stripping of the id from the URL,
+     * which can be dramatically simplified by just returning the base
+     * URL for the type.
+     *
+     * @method _stripIDFromURL
+     * @param {DS.Store} store
+     * @param {DS.Snapshot} snapshot
+     * @return {String} url
+     */
+    _stripIDFromURL: function _stripIDFromURL(store, snapshot) {
+      return this.buildURL(snapshot.modelName);
+    }
+  });
+
+});
+define('ember-django-adapter/serializers/drf', ['exports', 'ember-data', 'ember'], function (exports, DS, Ember) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].RESTSerializer.extend({
+    // Remove this in our 2.0 release.
+    isNewSerializerAPI: true,
+
+    /**
+     * Returns the resource's relationships formatted as a JSON-API "relationships object".
+     *
+     * http://jsonapi.org/format/#document-resource-object-relationships
+     *
+     * This version adds a 'links'hash with relationship urls before invoking the
+     * JSONSerializer's version.
+     *
+     * @method extractRelationships
+     * @param {Object} modelClass
+     * @param {Object} resourceHash
+     * @return {Object}
+     */
+    extractRelationships: function extractRelationships(modelClass, resourceHash) {
+      if (!resourceHash.hasOwnProperty('links')) {
+        resourceHash['links'] = {};
+      }
+
+      modelClass.eachRelationship(function (key, relationshipMeta) {
+        var payloadRelKey = this.keyForRelationship(key);
+
+        if (!resourceHash.hasOwnProperty(payloadRelKey)) {
+          return;
+        }
+
+        if (relationshipMeta.kind === 'hasMany' || relationshipMeta.kind === 'belongsTo') {
+          // Matches strings starting with: https://, http://, //, /
+          var payloadRel = resourceHash[payloadRelKey];
+          if (!Ember['default'].isNone(payloadRel) && !Ember['default'].isNone(payloadRel.match) && typeof payloadRel.match === 'function' && payloadRel.match(/^((https?:)?\/\/|\/)\w/)) {
+            resourceHash['links'][key] = resourceHash[payloadRelKey];
+            delete resourceHash[payloadRelKey];
+          }
+        }
+      }, this);
+
+      return this._super(modelClass, resourceHash);
+    },
+
+    /**
+     *  Returns the number extracted from the page number query param of
+     *  a `url`. `null` is returned when the page number query param
+     *  isn't present in the url. `null` is also returned when `url` is
+     *  `null`.
+     *
+     * @method extractPageNumber
+     * @private
+     * @param {String} url
+     * @return {Number} page number
+     */
+    extractPageNumber: function extractPageNumber(url) {
+      var match = /.*?[\?&]page=(\d+).*?/.exec(url);
+      if (match) {
+        return Number(match[1]).valueOf();
+      }
+      return null;
+    },
+
+    /**
+     * Converts DRF API server responses into the format expected by the RESTSerializer.
+     *
+     * If the payload has DRF metadata and results properties, all properties that aren't in
+     * the results are added to the 'meta' hash so that Ember Data can use these properties
+     * for metadata. The next and previous pagination URLs are parsed to make it easier to
+     * paginate data in applications. The RESTSerializer's version of this function is called
+     * with the converted payload.
+     *
+     * @method normalizeResponse
+     * @param {DS.Store} store
+     * @param {DS.Model} primaryModelClass
+     * @param {Object} payload
+     * @param {String|Number} id
+     * @param {String} requestType
+     * @return {Object} JSON-API Document
+     */
+    normalizeResponse: function normalizeResponse(store, primaryModelClass, payload, id, requestType) {
+      var convertedPayload = {};
+
+      if (!Ember['default'].isNone(payload) && payload.hasOwnProperty('count') && payload.hasOwnProperty('next') && payload.hasOwnProperty('previous') && payload.hasOwnProperty('results')) {
+
+        // Move DRF metadata to the meta hash.
+        convertedPayload[primaryModelClass.modelName] = JSON.parse(JSON.stringify(payload.results));
+        delete payload.results;
+        convertedPayload['meta'] = JSON.parse(JSON.stringify(payload));
+
+        // The next and previous pagination URLs are parsed to make it easier to paginate data in applications.
+        if (!Ember['default'].isNone(convertedPayload.meta['next'])) {
+          convertedPayload.meta['next'] = this.extractPageNumber(convertedPayload.meta['next']);
+        }
+        if (!Ember['default'].isNone(convertedPayload.meta['previous'])) {
+          var pageNumber = this.extractPageNumber(convertedPayload.meta['previous']);
+          // The DRF previous URL doesn't always include the page=1 query param in the results for page 2. We need to
+          // explicitly set previous to 1 when the previous URL is defined but the page is not set.
+          if (Ember['default'].isNone(pageNumber)) {
+            pageNumber = 1;
+          }
+          convertedPayload.meta['previous'] = pageNumber;
+        }
+      } else {
+        convertedPayload[primaryModelClass.modelName] = JSON.parse(JSON.stringify(payload));
+      }
+
+      return this._super(store, primaryModelClass, convertedPayload, id, requestType);
+    },
+
+    /**
+     * You can use this method to customize how a serialized record is
+     * added to the complete JSON hash to be sent to the server. By
+     * default the JSON Serializer does not namespace the payload and
+     * just sends the raw serialized JSON object.
+     *
+     * If your server expects namespaced keys, you should consider using
+     * the RESTSerializer.  Otherwise you can override this method to
+     * customize how the record is added to the hash.
+     *
+     * For example, your server may expect underscored root objects.
+     *
+     * @method serializeIntoHash
+     * @param {Object} hash
+     * @param {subclass of DS.Model} type
+     * @param {DS.Snapshot} snapshot
+     * @param {Object} options
+     */
+    serializeIntoHash: function serializeIntoHash(hash, type, snapshot, options) {
+      Ember['default'].merge(hash, this.serialize(snapshot, options));
+    },
+
+    /**
+     * `keyForAttribute` can be used to define rules for how to convert
+     * an attribute name in your model to a key in your JSON.
+     *
+     * @method keyForAttribute
+     * @param {String} key
+     * @return {String} normalized key
+     */
+    keyForAttribute: function keyForAttribute(key) {
+      return Ember['default'].String.decamelize(key);
+    },
+
+    /**
+     * `keyForRelationship` can be used to define a custom key when
+     * serializing relationship properties. By default `JSONSerializer`
+     * does not provide an implementation of this method.
+     *
+     * @method keyForRelationship
+     * @param {String} key
+     * @return {String} normalized key
+     */
+    keyForRelationship: function keyForRelationship(key) {
+      return Ember['default'].String.decamelize(key);
+    }
+  });
+
+});
+define('ember-django-adapter', ['ember-django-adapter/index', 'ember', 'exports'], function(__index__, __Ember__, __exports__) {
+  'use strict';
+  var keys = Object.keys || __Ember__['default'].keys;
+  var forEach = Array.prototype.forEach && function(array, cb) {
+    array.forEach(cb);
+  } || __Ember__['default'].EnumerableUtils.forEach;
+
+  forEach(keys(__index__), (function(key) {
+    __exports__[key] = __index__[key];
+  }));
+});
+
 ;/* jshint ignore:start */
 
 
