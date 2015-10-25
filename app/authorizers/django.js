@@ -2,7 +2,7 @@
 import Base from 'ember-simple-auth/authorizers/base';
 
 export default Base.extend({
-  authorize(sessionData, block) {
-   
+  authorize: function(jqXHR, requestOptions) {
+    jqXHR.setRequestHeader('Cookie', '1234lkj1sdfguihsidfugh');
   }
 });

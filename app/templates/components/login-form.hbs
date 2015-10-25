@@ -1,12 +1,29 @@
 {{!-- app/templates/login.hbs --}}
 <form {{action 'authenticate' on='submit'}}>
   <div class="form-group">
-    <label for="identification">Login</label>
+    <label for="identification">
+      Login
+      {{#if loginError}}
+        <code>{{loginError}}</code>
+      {{/if}}
+    </label>
     {{input value=identification placeholder='Enter Login' class='form-control'}}
   </div>
   <div class="form-group">
-    <label for="password">Password</label>
+    <label for="password">
+      Password
+      {{#if passwordError}}
+        <code>{{passwordError}}</code>
+      {{/if}}
+    </label>
     {{input value=password placeholder='Enter Password' class='form-control' type='password'}}
   </div>
   <button type="submit" class="btn btn-default">Login</button>
 </form>
+
+{{#if errorMessage}}
+	<p>
+		<strong> Login failed: </strong>
+		<code>{{errorMessage}}</code>
+	</p>
+{{/if}}

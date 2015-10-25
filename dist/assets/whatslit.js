@@ -49,30 +49,46 @@ define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenti
   'use strict';
 
   exports['default'] = Base['default'].extend({
+
+    init: function init() {
+      var globalConfig = window.ENV['ember-simple-auth'] || {};
+      this.serverTokenEndpoint = globalConfig.serverTokenEndpoint || '/api-token-auth/';
+    },
     restore: function restore(data) {},
     authenticate: function authenticate(options) {
+      console.log(options.password);
+      console.log(this.serverTokenEndpoint);
+      var _this = this;
       return new Ember.RSVP.Promise(function (resolve, reject) {
+        var data = { username: options.identification, password: options.password };
         Ember.$.ajax({
-          type: "POST",
-          url: 'http://192.168.1.7:5000/api-auth-token',
-          contentType: 'application/json;charset=utf-8',
+          url: _this.serverTokenEndpoint,
+          type: 'POST',
+          data: data,
           dataType: 'json',
-          data: JSON.stringify({
-            username: options.identification,
-            password: options.password
-          })
+          timeout: 3000,
+          contentType: 'application/x-www-form-urlencoded'
         }).then(function (response) {
           Ember.run(function () {
             resolve(response);
           });
         }, function (xhr, status, error) {
           Ember.run(function () {
-            reject(xhr.responseJSON || xhr.responseText);
+            reject(xhr.responseJSON || error);
           });
         });
       });
     },
-    invalidate: function invalidate(data) {}
+    invalidate: function invalidate() {
+      Ember.$.ajax({
+        type: "POST",
+        url: 'http://192.168.1.7:5000/logout/',
+        contentType: 'application/json;charset=utf-8',
+        dataType: 'json'
+      });
+
+      return Ember.RSVP.resolve();
+    }
   });
 
 });
@@ -82,7 +98,9 @@ define('whatslit/authorizers/django', ['exports', 'ember-simple-auth/authorizers
 
   // app/authorizers/custom.js
   exports['default'] = Base['default'].extend({
-    authorize: function authorize(sessionData, block) {}
+    authorize: function authorize(jqXHR, requestOptions) {
+      jqXHR.setRequestHeader('Cookie', '1234lkj1sdfguihsidfugh');
+    }
   });
 
 });
@@ -102,26 +120,41 @@ define('whatslit/components/app-version', ['exports', 'ember-cli-app-version/com
 });
 define('whatslit/components/login-form', ['exports', 'ember'], function (exports, Ember) {
 
-  'use strict';
+	'use strict';
 
-  exports['default'] = Ember['default'].Component.extend({
-    session: Ember['default'].inject.service('session'),
+	exports['default'] = Ember['default'].Component.extend({
+			session: Ember['default'].inject.service('session'),
 
-    actions: {
-      authenticate: function authenticate() {
-        var _this = this;
+			actions: {
+					authenticate: function authenticate() {
+							var _this = this;
 
-        var _getProperties = this.getProperties('identification', 'password');
+							var _getProperties = this.getProperties('identification', 'password');
 
-        var identification = _getProperties.identification;
-        var password = _getProperties.password;
+							var identification = _getProperties.identification;
+							var password = _getProperties.password;
 
-        this.get('session').authenticate('authenticator:django', identification, password)['catch'](function (reason) {
-          _this.set('errorMessage', reason.error);
-        });
-      }
-    }
-  });
+							var options = { identification: identification, password: password };
+
+							this.get('session').authenticate('authenticator:django', options)['catch'](function (reason) {
+									if (reason == "timeout") _this.set('errorMessage', "Timeout.");else {
+											//In the case that a legitmate error has been received.
+											_this.set('loginError', null);
+											_this.set('passwordError', null);
+											_this.set('errorMessages', null);
+
+											if (reason.username) _this.set('loginError', reason.username[0]);
+
+											if (reason.password) _this.set('passwordError', reason.password[0]);
+
+											if (reason.non_field_errors) _this.set('errorMessages', reason.non_field_errors);
+									}
+
+									console.log(reason);
+							});
+					}
+			}
+	});
 
 });
 define('whatslit/components/main-navigation', ['exports', 'ember'], function (exports, Ember) {
@@ -170,6 +203,18 @@ define('whatslit/initializers/app-version', ['exports', 'ember-cli-app-version/i
   exports['default'] = {
     name: 'App Version',
     initialize: initializerFactory['default'](name, version)
+  };
+
+});
+define('whatslit/initializers/auth', ['exports', 'whatslit/config/environment'], function (exports, ENV) {
+
+  'use strict';
+
+  exports['default'] = {
+    name: 'auth',
+    initialize: function initialize(container, application) {
+      window.ENV = ENV['default'];
+    }
   };
 
 });
@@ -665,6 +710,150 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
   'use strict';
 
   exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 6,
+              "column": 6
+            },
+            "end": {
+              "line": 8,
+              "column": 6
+            }
+          },
+          "moduleName": "whatslit/templates/components/login-form.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("        ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","loginError",["loc",[null,[7,14],[7,28]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    var child1 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 15,
+              "column": 6
+            },
+            "end": {
+              "line": 17,
+              "column": 6
+            }
+          },
+          "moduleName": "whatslit/templates/components/login-form.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("        ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","passwordError",["loc",[null,[16,14],[16,31]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    var child2 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 24,
+              "column": 0
+            },
+            "end": {
+              "line": 29,
+              "column": 0
+            }
+          },
+          "moduleName": "whatslit/templates/components/login-form.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("	");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("p");
+          var el2 = dom.createTextNode("\n		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("strong");
+          var el3 = dom.createTextNode(" Login failed: ");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("code");
+          var el3 = dom.createComment("");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n	");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 3]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","errorMessage",["loc",[null,[27,8],[27,24]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
     return {
       meta: {
         "revision": "Ember@1.13.7",
@@ -675,7 +864,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
             "column": 0
           },
           "end": {
-            "line": 12,
+            "line": 29,
             "column": 7
           }
         },
@@ -695,7 +884,11 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("label");
         dom.setAttribute(el3,"for","identification");
-        var el4 = dom.createTextNode("Login");
+        var el4 = dom.createTextNode("\n      Login\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("    ");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n    ");
@@ -713,7 +906,11 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("label");
         dom.setAttribute(el3,"for","password");
-        var el4 = dom.createTextNode("Password");
+        var el4 = dom.createTextNode("\n      Password\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("    ");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n    ");
@@ -734,23 +931,36 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
         var element0 = dom.childAt(fragment, [0]);
-        var morphs = new Array(3);
+        var element1 = dom.childAt(element0, [1]);
+        var element2 = dom.childAt(element0, [3]);
+        var morphs = new Array(6);
         morphs[0] = dom.createElementMorph(element0);
-        morphs[1] = dom.createMorphAt(dom.childAt(element0, [1]),3,3);
-        morphs[2] = dom.createMorphAt(dom.childAt(element0, [3]),3,3);
+        morphs[1] = dom.createMorphAt(dom.childAt(element1, [1]),1,1);
+        morphs[2] = dom.createMorphAt(element1,3,3);
+        morphs[3] = dom.createMorphAt(dom.childAt(element2, [1]),1,1);
+        morphs[4] = dom.createMorphAt(element2,3,3);
+        morphs[5] = dom.createMorphAt(fragment,2,2,contextualElement);
+        dom.insertBoundary(fragment, null);
         return morphs;
       },
       statements: [
         ["element","action",["authenticate"],["on","submit"],["loc",[null,[2,6],[2,43]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[5,18],[5,32]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[5,4],[5,81]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[9,18],[9,26]]]]],[],[]],"placeholder","Enter Password","class","form-control","type","password"],["loc",[null,[9,4],[9,94]]]]
+        ["block","if",[["get","loginError",["loc",[null,[6,12],[6,22]]]]],[],0,null,["loc",[null,[6,6],[8,13]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[10,18],[10,32]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[10,4],[10,81]]]],
+        ["block","if",[["get","passwordError",["loc",[null,[15,12],[15,25]]]]],[],1,null,["loc",[null,[15,6],[17,13]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[19,18],[19,26]]]]],[],[]],"placeholder","Enter Password","class","form-control","type","password"],["loc",[null,[19,4],[19,94]]]],
+        ["block","if",[["get","errorMessage",["loc",[null,[24,6],[24,18]]]]],[],2,null,["loc",[null,[24,0],[29,7]]]]
       ],
       locals: [],
-      templates: []
+      templates: [child0, child1, child2]
     };
   }()));
 
@@ -1342,7 +1552,7 @@ define('whatslit/tests/authenticators/django.jshint', function () {
 
   QUnit.module('JSHint - authenticators');
   QUnit.test('authenticators/django.js should pass jshint', function(assert) { 
-    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 5, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 8, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 30, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n5 errors'); 
+    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 6, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 10, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 13, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 33, col 15, Bad line breaking before \'||\'.\n\n6 errors'); 
   });
 
 });
@@ -1352,7 +1562,7 @@ define('whatslit/tests/authorizers/django.jshint', function () {
 
   QUnit.module('JSHint - authorizers');
   QUnit.test('authorizers/django.js should pass jshint', function(assert) { 
-    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 5, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
   });
 
 });
@@ -1362,7 +1572,7 @@ define('whatslit/tests/components/login-form.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/login-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 9, col 103, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n6 errors'); 
+    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 22, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 38, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 25, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n8 errors'); 
   });
 
 });
@@ -1485,6 +1695,16 @@ define('whatslit/tests/helpers/start-app.jshint', function () {
   QUnit.module('JSHint - helpers');
   QUnit.test('helpers/start-app.js should pass jshint', function(assert) { 
     assert.ok(true, 'helpers/start-app.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/initializers/auth.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - initializers');
+  QUnit.test('initializers/auth.js should pass jshint', function(assert) { 
+    assert.ok(false, 'initializers/auth.js should pass jshint.\ninitializers/auth.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ninitializers/auth.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
   });
 
 });
@@ -2011,7 +2231,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+f4db6b25","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+fbe551bf","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
