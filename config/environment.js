@@ -21,14 +21,14 @@ module.exports = function(environment) {
       'default-src': "'none'",
       'script-src': "'self' 'unsafe-inline' 'unsafe-eval' use.typekit.net connect.facebook.net maps.googleapis.com maps.gstatic.com",
       'font-src': "'self' data: use.typekit.net",
-      'connect-src': "'self' 192.168.1.7 api.whatslit.io  192.168.1.7:5000", //Questionable?
+      'connect-src': "'self' 192.168.1.7 api.whatslit.io  192.168.1.7:5000 localhost:5000", //Questionable?
       'img-src': "'self' www.facebook.com ",
       'style-src': "'self' 'unsafe-inline'",
       'frame-src': "s-static.ak.facebook.com static.ak.facebook.com www.facebook.com"
     },
   };
 
-  if (environment === 'development') {
+  if (environment === 'landev') {
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
@@ -36,10 +36,24 @@ module.exports = function(environment) {
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
       ENV.APP.API_HOST = 'http://192.168.1.7:5000';
       ENV['ember-simple-auth'] = {
-      authorizer: 'authorizer:django',
-      serverTokenEndpoint: 'http://192.168.1.7:5000/api-token-auth/',
-      crossOriginWhitelist: ['http://192.168.1.7:5000']
-    };
+        authorizer: 'authorizer:django',
+        serverTokenEndpoint: 'http://192.168.1.7:5000/api-token-auth/',
+        crossOriginWhitelist: ['http://192.168.1.7:5000']
+      };
+  }
+
+  if(environment === 'development'){
+    // ENV.APP.LOG_RESOLVER = true;
+    // ENV.APP.LOG_ACTIVE_GENERATION = true;
+    // ENV.APP.LOG_TRANSITIONS = true;
+    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
+    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+      ENV.APP.API_HOST = 'http://localhost:5000';
+      ENV['ember-simple-auth'] = {
+        authorizer: 'authorizer:django',
+        serverTokenEndpoint: 'http://localhost:5000/api-token-auth/',
+        crossOriginWhitelist: ['http://localhost:5000']
+      };
   }
 
   if (environment === 'test') {

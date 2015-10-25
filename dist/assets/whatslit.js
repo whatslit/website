@@ -107,7 +107,11 @@ define('whatslit/authorizers/django', ['exports', 'ember-simple-auth/authorizers
   // app/authorizers/custom.js
   exports['default'] = Base['default'].extend({
     authorize: function authorize(jqXHR, requestOptions) {
-      jqXHR.setRequestHeader('Cookie', '1234lkj1sdfguihsidfugh');
+      var secureData = this.get('session.data');
+      var accessToken = secureData.token;
+      if (this.get('session.isAuthenticated') && !Ember.isEmpty(accessToken)) {
+        jqXHR.setRequestHeader('Authorization', 'Token ' + accessToken.authenticated.token);
+      }
     }
   });
 
@@ -827,7 +831,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
           return morphs;
         },
         statements: [
-          ["block","each",[["get","errorMessages",["loc",[null,[6,23],[6,36]]]]],[],0,null,["loc",[null,[6,6],[8,15]]]]
+          ["block","each",[["get","errorMessages",["loc",[null,[6,14],[6,27]]]]],[],0,null,["loc",[null,[6,6],[8,15]]]]
         ],
         locals: [],
         templates: [child0]
@@ -1628,7 +1632,7 @@ define('whatslit/tests/authorizers/django.jshint', function () {
 
   QUnit.module('JSHint - authorizers');
   QUnit.test('authorizers/django.js should pass jshint', function(assert) { 
-    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 5, col 4, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
   });
 
 });
@@ -2297,7 +2301,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+fbe551bf","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+79453274","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
