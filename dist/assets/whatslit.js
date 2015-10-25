@@ -44,81 +44,45 @@ define('whatslit/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initia
   exports['default'] = App;
 
 });
-define('whatslit/authenticators/django-rest', ['exports', 'ember', 'simple-auth/authenticators/base', 'whatslit/utils/is-secure-url'], function (exports, Ember, Base, isSecureUrl) {
+define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenticators/base'], function (exports, Base) {
 
   'use strict';
 
   exports['default'] = Base['default'].extend({
-
-    init: function init() {
-      var globalConfig = window.ENV['simple-auth'] || {};
-      this.serverTokenEndpoint = globalConfig.serverTokenEndpoint || '/api-token-auth/';
-    },
-
-    authenticate: function authenticate(credentials) {
-      var _this = this;
-      return new Ember['default'].RSVP.Promise(function (resolve, reject) {
-        var data = { username: credentials.identification, password: credentials.password };
-        _this.makeRequest(_this.serverTokenEndpoint, data).then(function (response) {
-          Ember['default'].run(function () {
-            resolve(Ember['default'].$.extend(response));
+    restore: function restore(data) {},
+    authenticate: function authenticate(options) {
+      return new Ember.RSVP.Promise(function (resolve, reject) {
+        Ember.$.ajax({
+          type: "POST",
+          url: 'http://192.168.1.7:5000/api-auth-token',
+          contentType: 'application/json;charset=utf-8',
+          dataType: 'json',
+          data: JSON.stringify({
+            username: options.identification,
+            password: options.password
+          })
+        }).then(function (response) {
+          Ember.run(function () {
+            resolve(response);
           });
         }, function (xhr, status, error) {
-          Ember['default'].run(function () {
+          Ember.run(function () {
             reject(xhr.responseJSON || xhr.responseText);
           });
         });
       });
     },
-
-    restore: function restore(data) {
-      return new Ember['default'].RSVP.Promise(function (resolve, reject) {
-        if (!Ember['default'].isEmpty(data.token)) {
-          resolve(data);
-        } else {
-          reject();
-        }
-      });
-    },
-
-    invalidate: function invalidate(data) {
-      function success(resolve) {
-        resolve();
-      }
-      return new Ember['default'].RSVP.Promise(function (resolve, reject) {
-        success(resolve);
-      });
-    },
-
-    makeRequest: function makeRequest(url, data) {
-      if (!isSecureUrl['default'](url)) {
-        Ember['default'].Logger.warn('Credentials are transmitted via an insecure connection - use HTTPS to keep them secure.');
-      }
-      return Ember['default'].$.ajax({
-        url: url,
-        type: 'POST',
-        data: data,
-        dataType: 'json',
-        contentType: 'application/x-www-form-urlencoded'
-      });
-    }
+    invalidate: function invalidate(data) {}
   });
 
 });
-define('whatslit/authorizers/django-rest', ['exports', 'simple-auth/authorizers/base', 'whatslit/utils/is-secure-url'], function (exports, Base, isSecureUrl) {
+define('whatslit/authorizers/django', ['exports', 'ember-simple-auth/authorizers/base'], function (exports, Base) {
 
   'use strict';
 
+  // app/authorizers/custom.js
   exports['default'] = Base['default'].extend({
-    authorize: function authorize(jqXHR, requestOptions) {
-      var accessToken = this.get('session.token');
-      if (this.get('session.isAuthenticated') && !Ember.isEmpty(accessToken)) {
-        if (!isSecureUrl['default'](requestOptions.url)) {
-          Ember.Logger.warn('Credentials are transmitted via an insecure connection - use HTTPS to keep them secure.');
-        }
-        jqXHR.setRequestHeader('Authorization', 'Token ' + accessToken);
-      }
-    }
+    authorize: function authorize(sessionData, block) {}
   });
 
 });
@@ -152,7 +116,7 @@ define('whatslit/components/login-form', ['exports', 'ember'], function (exports
         var identification = _getProperties.identification;
         var password = _getProperties.password;
 
-        this.get('session').authenticate('authenticator:auth', identification, password)['catch'](function (reason) {
+        this.get('session').authenticate('authenticator:django', identification, password)['catch'](function (reason) {
           _this.set('errorMessage', reason.error);
         });
       }
@@ -206,31 +170,6 @@ define('whatslit/initializers/app-version', ['exports', 'ember-cli-app-version/i
   exports['default'] = {
     name: 'App Version',
     initialize: initializerFactory['default'](name, version)
-  };
-
-});
-define('whatslit/initializers/auth', ['exports'], function (exports) {
-
-  'use strict';
-
-  exports['default'] = {
-    name: 'auth',
-    before: 'django-rest-auth',
-    initialize: function initialize(container, application) {}
-  };
-
-});
-define('whatslit/initializers/django-rest', ['exports', 'whatslit/authenticators/django-rest', 'whatslit/authorizers/django-rest'], function (exports, Authenticator, Authorizer) {
-
-  'use strict';
-
-  exports['default'] = {
-    name: 'django-rest-auth',
-    before: 'simple-auth',
-    initialize: function initialize(container, application) {
-      container.register('authorizer:django-rest', Authorizer['default']);
-      container.register('authenticator:django-rest', Authenticator['default']);
-    }
   };
 
 });
@@ -1397,13 +1336,33 @@ define('whatslit/tests/app.jshint', function () {
   });
 
 });
+define('whatslit/tests/authenticators/django.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - authenticators');
+  QUnit.test('authenticators/django.js should pass jshint', function(assert) { 
+    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 5, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 8, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 30, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n5 errors'); 
+  });
+
+});
+define('whatslit/tests/authorizers/django.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - authorizers');
+  QUnit.test('authorizers/django.js should pass jshint', function(assert) { 
+    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 5, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+  });
+
+});
 define('whatslit/tests/components/login-form.jshint', function () {
 
   'use strict';
 
   QUnit.module('JSHint - components');
   QUnit.test('components/login-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 9, col 101, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n6 errors'); 
+    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 9, col 103, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n6 errors'); 
   });
 
 });
@@ -1526,16 +1485,6 @@ define('whatslit/tests/helpers/start-app.jshint', function () {
   QUnit.module('JSHint - helpers');
   QUnit.test('helpers/start-app.js should pass jshint', function(assert) { 
     assert.ok(true, 'helpers/start-app.js should pass jshint.'); 
-  });
-
-});
-define('whatslit/tests/initializers/auth.jshint', function () {
-
-  'use strict';
-
-  QUnit.module('JSHint - initializers');
-  QUnit.test('initializers/auth.js should pass jshint', function(assert) { 
-    assert.ok(false, 'initializers/auth.js should pass jshint.\ninitializers/auth.js: line 1, col 1, \'export\' is only available in ES6 (use esnext option).\n\n1 error'); 
   });
 
 });
@@ -2034,18 +1983,6 @@ define('whatslit/tests/unit/routes/test-test.jshint', function () {
   });
 
 });
-define('whatslit/utils/is-secure-url', ['exports'], function (exports) {
-
-  'use strict';
-
-  exports['default'] = function (url) {
-    var link = document.createElement('a');
-    link.href = url;
-    link.href = link.href;
-    return link.protocol == 'https:';
-  }
-
-});
 /* jshint ignore:start */
 
 /* jshint ignore:end */
@@ -2074,7 +2011,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+235866bc","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+f4db6b25","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
