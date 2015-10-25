@@ -40,11 +40,21 @@ module.exports = function(environment) {
   }
 if (environment === 'development') {
     ENV.APP.API_HOST = 'http://192.168.1.7:5000';
+    ENV['simple-auth'] = {
+      authorizer: 'authorizer:django-rest',
+      serverTokenEndpoint: 'http://192.168.1.7:5000/api-token-auth/',
+      crossOriginWhitelist: ['http://192.168.1.7:5000']
+    };
   }
 
 
   if (environment === 'production') {
     ENV.APP.API_HOST = 'http://api.whatslit.io';
+    ENV['simple-auth'] = {
+      authorizer: 'authorizer:django-rest',
+      serverTokenEndpoint: 'http://api.whatslit.io/api-token-auth/',
+      crossOriginWhitelist: ['http://api.whatslit.io']
+    };
   }
 
   return ENV;
