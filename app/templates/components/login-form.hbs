@@ -1,5 +1,14 @@
 {{!-- app/templates/login.hbs --}}
 <form {{action 'authenticate' on='submit'}}>
+  {{#if errorMessages}}
+    <strong> Login failed: </strong> 
+    <ul>
+      {{#each error in errorMessages}}
+        <li><code>{{error}}</code></li>
+      {{/each}}
+    </ul>
+  {{/if}}
+
   <div class="form-group">
     <label for="identification">
       Login
@@ -20,10 +29,3 @@
   </div>
   <button type="submit" class="btn btn-default">Login</button>
 </form>
-
-{{#if errorMessage}}
-	<p>
-		<strong> Login failed: </strong>
-		<code>{{errorMessage}}</code>
-	</p>
-{{/if}}

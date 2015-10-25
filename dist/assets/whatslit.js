@@ -54,11 +54,18 @@ define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenti
       var globalConfig = window.ENV['ember-simple-auth'] || {};
       this.serverTokenEndpoint = globalConfig.serverTokenEndpoint || '/api-token-auth/';
     },
-    restore: function restore(data) {},
+    restore: function restore(data) {
+      return new Ember.RSVP.Promise(function (resolve, reject) {
+        if (!Ember.isEmpty(data.token)) {
+          resolve(data);
+        } else {
+          reject();
+        }
+      });
+    },
     authenticate: function authenticate(options) {
-      console.log(options.password);
-      console.log(this.serverTokenEndpoint);
       var _this = this;
+
       return new Ember.RSVP.Promise(function (resolve, reject) {
         var data = { username: options.identification, password: options.password };
         Ember.$.ajax({
@@ -70,24 +77,25 @@ define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenti
           contentType: 'application/x-www-form-urlencoded'
         }).then(function (response) {
           Ember.run(function () {
+            //ON SUCCCESS (probably the token)
             resolve(response);
           });
         }, function (xhr, status, error) {
           Ember.run(function () {
+            //ON FAILURE
             reject(xhr.responseJSON || error);
           });
         });
       });
     },
     invalidate: function invalidate() {
-      Ember.$.ajax({
-        type: "POST",
-        url: 'http://192.168.1.7:5000/logout/',
-        contentType: 'application/json;charset=utf-8',
-        dataType: 'json'
+      function success(resolve) {
+        resolve();
+        //TODO: clear token online if needed.
+      }
+      return new Ember.RSVP.Promise(function (resolve, reject) {
+        success(resolve);
       });
-
-      return Ember.RSVP.resolve();
     }
   });
 
@@ -136,8 +144,18 @@ define('whatslit/components/login-form', ['exports', 'ember'], function (exports
 
 							var options = { identification: identification, password: password };
 
-							this.get('session').authenticate('authenticator:django', options)['catch'](function (reason) {
-									if (reason == "timeout") _this.set('errorMessage', "Timeout.");else {
+							this.get('session').authenticate('authenticator:django', options).then(function () {
+									//ON SUCCESS
+									//Clear error messages.
+									_this.set('loginError', null);
+									_this.set('passwordError', null);
+									_this.set('errorMessages', null);
+
+									console.log(_this.get('session.data'));
+							})['catch'](function (reason) {
+									//ON ERROR
+
+									if (reason == "timeout") _this.set('errorMessages', ["Connection to server timed out! ABORT."]);else {
 											//In the case that a legitmate error has been received.
 											_this.set('loginError', null);
 											_this.set('passwordError', null);
@@ -149,8 +167,6 @@ define('whatslit/components/login-form', ['exports', 'ember'], function (exports
 
 											if (reason.non_field_errors) _this.set('errorMessages', reason.non_field_errors);
 									}
-
-									console.log(reason);
 							});
 					}
 			}
@@ -161,7 +177,14 @@ define('whatslit/components/main-navigation', ['exports', 'ember'], function (ex
 
 	'use strict';
 
-	exports['default'] = Ember['default'].Component.extend({});
+	exports['default'] = Ember['default'].Component.extend({
+		session: Ember['default'].inject.service('session'),
+		actions: {
+			invalidateSession: function invalidateSession() {
+				this.get('session').invalidate();
+			}
+		}
+	});
 
 });
 define('whatslit/controllers/application', ['exports', 'ember'], function (exports, Ember) {
@@ -711,18 +734,64 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
 
   exports['default'] = Ember.HTMLBars.template((function() {
     var child0 = (function() {
+      var child0 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.7",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 6,
+                "column": 6
+              },
+              "end": {
+                "line": 8,
+                "column": 6
+              }
+            },
+            "moduleName": "whatslit/templates/components/login-form.hbs"
+          },
+          arity: 1,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("        ");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("li");
+            var el2 = dom.createElement("code");
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 0]),0,0);
+            return morphs;
+          },
+          statements: [
+            ["content","error",["loc",[null,[7,18],[7,27]]]]
+          ],
+          locals: ["error"],
+          templates: []
+        };
+      }());
       return {
         meta: {
           "revision": "Ember@1.13.7",
           "loc": {
             "source": null,
             "start": {
-              "line": 6,
-              "column": 6
+              "line": 3,
+              "column": 2
             },
             "end": {
-              "line": 8,
-              "column": 6
+              "line": 10,
+              "column": 2
             }
           },
           "moduleName": "whatslit/templates/components/login-form.hbs"
@@ -732,10 +801,20 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("        ");
+          var el1 = dom.createTextNode("    ");
           dom.appendChild(el0, el1);
-          var el1 = dom.createElement("code");
+          var el1 = dom.createElement("strong");
+          var el2 = dom.createTextNode(" Login failed: ");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode(" \n    ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("ul");
+          var el2 = dom.createTextNode("\n");
+          dom.appendChild(el1, el2);
           var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("    ");
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
           var el1 = dom.createTextNode("\n");
@@ -744,14 +823,14 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
           var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [3]),1,1);
           return morphs;
         },
         statements: [
-          ["content","loginError",["loc",[null,[7,14],[7,28]]]]
+          ["block","each",[["get","errorMessages",["loc",[null,[6,23],[6,36]]]]],[],0,null,["loc",[null,[6,6],[8,15]]]]
         ],
         locals: [],
-        templates: []
+        templates: [child0]
       };
     }());
     var child1 = (function() {
@@ -792,7 +871,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
           return morphs;
         },
         statements: [
-          ["content","passwordError",["loc",[null,[16,14],[16,31]]]]
+          ["content","loginError",["loc",[null,[16,14],[16,28]]]]
         ],
         locals: [],
         templates: []
@@ -806,11 +885,11 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
             "source": null,
             "start": {
               "line": 24,
-              "column": 0
+              "column": 6
             },
             "end": {
-              "line": 29,
-              "column": 0
+              "line": 26,
+              "column": 6
             }
           },
           "moduleName": "whatslit/templates/components/login-form.hbs"
@@ -820,22 +899,10 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("	");
+          var el1 = dom.createTextNode("        ");
           dom.appendChild(el0, el1);
-          var el1 = dom.createElement("p");
-          var el2 = dom.createTextNode("\n		");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createElement("strong");
-          var el3 = dom.createTextNode(" Login failed: ");
-          dom.appendChild(el2, el3);
-          dom.appendChild(el1, el2);
-          var el2 = dom.createTextNode("\n		");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createElement("code");
-          var el3 = dom.createComment("");
-          dom.appendChild(el2, el3);
-          dom.appendChild(el1, el2);
-          var el2 = dom.createTextNode("\n	");
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
           var el1 = dom.createTextNode("\n");
@@ -844,11 +911,11 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
           var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 3]),0,0);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
           return morphs;
         },
         statements: [
-          ["content","errorMessage",["loc",[null,[27,8],[27,24]]]]
+          ["content","passwordError",["loc",[null,[25,14],[25,31]]]]
         ],
         locals: [],
         templates: []
@@ -864,7 +931,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
             "column": 0
           },
           "end": {
-            "line": 29,
+            "line": 31,
             "column": 7
           }
         },
@@ -876,6 +943,10 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
         var el1 = dom.createElement("form");
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n  ");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("div");
@@ -931,33 +1002,28 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
         var element0 = dom.childAt(fragment, [0]);
-        var element1 = dom.childAt(element0, [1]);
-        var element2 = dom.childAt(element0, [3]);
+        var element1 = dom.childAt(element0, [3]);
+        var element2 = dom.childAt(element0, [5]);
         var morphs = new Array(6);
         morphs[0] = dom.createElementMorph(element0);
-        morphs[1] = dom.createMorphAt(dom.childAt(element1, [1]),1,1);
-        morphs[2] = dom.createMorphAt(element1,3,3);
-        morphs[3] = dom.createMorphAt(dom.childAt(element2, [1]),1,1);
-        morphs[4] = dom.createMorphAt(element2,3,3);
-        morphs[5] = dom.createMorphAt(fragment,2,2,contextualElement);
-        dom.insertBoundary(fragment, null);
+        morphs[1] = dom.createMorphAt(element0,1,1);
+        morphs[2] = dom.createMorphAt(dom.childAt(element1, [1]),1,1);
+        morphs[3] = dom.createMorphAt(element1,3,3);
+        morphs[4] = dom.createMorphAt(dom.childAt(element2, [1]),1,1);
+        morphs[5] = dom.createMorphAt(element2,3,3);
         return morphs;
       },
       statements: [
         ["element","action",["authenticate"],["on","submit"],["loc",[null,[2,6],[2,43]]]],
-        ["block","if",[["get","loginError",["loc",[null,[6,12],[6,22]]]]],[],0,null,["loc",[null,[6,6],[8,13]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[10,18],[10,32]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[10,4],[10,81]]]],
-        ["block","if",[["get","passwordError",["loc",[null,[15,12],[15,25]]]]],[],1,null,["loc",[null,[15,6],[17,13]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[19,18],[19,26]]]]],[],[]],"placeholder","Enter Password","class","form-control","type","password"],["loc",[null,[19,4],[19,94]]]],
-        ["block","if",[["get","errorMessage",["loc",[null,[24,6],[24,18]]]]],[],2,null,["loc",[null,[24,0],[29,7]]]]
+        ["block","if",[["get","errorMessages",["loc",[null,[3,8],[3,21]]]]],[],0,null,["loc",[null,[3,2],[10,9]]]],
+        ["block","if",[["get","loginError",["loc",[null,[15,12],[15,22]]]]],[],1,null,["loc",[null,[15,6],[17,13]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[19,18],[19,32]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[19,4],[19,81]]]],
+        ["block","if",[["get","passwordError",["loc",[null,[24,12],[24,25]]]]],[],2,null,["loc",[null,[24,6],[26,13]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[28,18],[28,26]]]]],[],[]],"placeholder","Enter Password","class","form-control","type","password"],["loc",[null,[28,4],[28,94]]]]
       ],
       locals: [],
       templates: [child0, child1, child2]
@@ -1344,7 +1410,7 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
   }()));
 
 });
-define('whatslit/templates/index', ['exports'], function (exports) {
+define('whatslit/templates/landing-index', ['exports'], function (exports) {
 
   'use strict';
 
@@ -1363,7 +1429,7 @@ define('whatslit/templates/index', ['exports'], function (exports) {
             "column": 0
           }
         },
-        "moduleName": "whatslit/templates/index.hbs"
+        "moduleName": "whatslit/templates/landing-index.hbs"
       },
       arity: 0,
       cachedFragment: null,
@@ -1552,7 +1618,7 @@ define('whatslit/tests/authenticators/django.jshint', function () {
 
   QUnit.module('JSHint - authenticators');
   QUnit.test('authenticators/django.js should pass jshint', function(assert) { 
-    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 6, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 10, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 13, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 33, col 15, Bad line breaking before \'||\'.\n\n6 errors'); 
+    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 6, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 10, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 19, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 33, col 22, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 42, col 17, Bad line breaking before \'||\'.\n\n7 errors'); 
   });
 
 });
@@ -1572,7 +1638,7 @@ define('whatslit/tests/components/login-form.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/login-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 22, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 38, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 25, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n8 errors'); 
+    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 22, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 38, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 18, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 21, col 50, Missing semicolon.\ncomponents/login-form.js: line 22, col 27, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n10 errors'); 
   });
 
 });
@@ -1582,7 +1648,7 @@ define('whatslit/tests/components/main-navigation.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/main-navigation.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/main-navigation.js should pass jshint.\ncomponents/main-navigation.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/main-navigation.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+    assert.ok(false, 'components/main-navigation.js should pass jshint.\ncomponents/main-navigation.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/main-navigation.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/main-navigation.js: line 6, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
   });
 
 });
