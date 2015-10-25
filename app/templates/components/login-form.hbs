@@ -3,7 +3,7 @@
   {{#if errorMessages}}
     <strong> Login failed: </strong> 
     <ul>
-      {{#each error in errorMessages}}
+      {{#each errorMessages as |error|}}
         <li><code>{{error}}</code></li>
       {{/each}}
     </ul>

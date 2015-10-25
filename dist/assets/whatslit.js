@@ -107,7 +107,11 @@ define('whatslit/authorizers/django', ['exports', 'ember-simple-auth/authorizers
   // app/authorizers/custom.js
   exports['default'] = Base['default'].extend({
     authorize: function authorize(jqXHR, requestOptions) {
-      jqXHR.setRequestHeader('Cookie', '1234lkj1sdfguihsidfugh');
+      var secureData = this.get('session.data');
+      var accessToken = secureData.token;
+      if (this.get('session.isAuthenticated') && !Ember.isEmpty(accessToken)) {
+        jqXHR.setRequestHeader('Authorization', 'Token ' + accessToken.authenticated.token);
+      }
     }
   });
 
@@ -306,6 +310,25 @@ define('whatslit/instance-initializers/ember-simple-auth', ['exports', 'ember-si
       setupSessionRestoration['default'](instance);
     }
   };
+
+});
+define('whatslit/models/event', ['exports', 'ember-data'], function (exports, DS) {
+
+  'use strict';
+
+  exports['default'] = DS['default'].Model.extend({
+    owner: DS['default'].belongsTo('user')
+  });
+
+});
+define('whatslit/models/user', ['exports', 'ember-data'], function (exports, DS) {
+
+	'use strict';
+
+	exports['default'] = DS['default'].Model.extend({
+		username: DS['default'].attr('string')
+
+	});
 
 });
 define('whatslit/router', ['exports', 'ember', 'whatslit/config/environment'], function (exports, Ember, config) {
@@ -827,7 +850,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
           return morphs;
         },
         statements: [
-          ["block","each",[["get","errorMessages",["loc",[null,[6,23],[6,36]]]]],[],0,null,["loc",[null,[6,6],[8,15]]]]
+          ["block","each",[["get","errorMessages",["loc",[null,[6,14],[6,27]]]]],[],0,null,["loc",[null,[6,6],[8,15]]]]
         ],
         locals: [],
         templates: [child0]
@@ -1628,7 +1651,7 @@ define('whatslit/tests/authorizers/django.jshint', function () {
 
   QUnit.module('JSHint - authorizers');
   QUnit.test('authorizers/django.js should pass jshint', function(assert) { 
-    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+    assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 5, col 4, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
   });
 
 });
@@ -2060,6 +2083,26 @@ define('whatslit/tests/integration/components/main-navigation-test.jshint', func
   });
 
 });
+define('whatslit/tests/models/event.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - models');
+  QUnit.test('models/event.js should pass jshint', function(assert) { 
+    assert.ok(false, 'models/event.js should pass jshint.\nmodels/event.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nmodels/event.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+  });
+
+});
+define('whatslit/tests/models/user.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - models');
+  QUnit.test('models/user.js should pass jshint', function(assert) { 
+    assert.ok(false, 'models/user.js should pass jshint.\nmodels/user.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nmodels/user.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+  });
+
+});
 define('whatslit/tests/router.jshint', function () {
 
   'use strict';
@@ -2166,6 +2209,58 @@ define('whatslit/tests/unit/controllers/login-form-controller-test.jshint', func
   QUnit.module('JSHint - unit/controllers');
   QUnit.test('unit/controllers/login-form-controller-test.js should pass jshint', function(assert) { 
     assert.ok(true, 'unit/controllers/login-form-controller-test.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/models/event-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleForModel('event', 'Unit | Model | event', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var model = this.subject();
+    // var store = this.store();
+    assert.ok(!!model);
+  });
+
+});
+define('whatslit/tests/unit/models/event-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/models');
+  QUnit.test('unit/models/event-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/models/event-test.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/models/user-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleForModel('user', 'Unit | Model | user', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var model = this.subject();
+    // var store = this.store();
+    assert.ok(!!model);
+  });
+
+});
+define('whatslit/tests/unit/models/user-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/models');
+  QUnit.test('unit/models/user-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/models/user-test.js should pass jshint.'); 
   });
 
 });
@@ -2297,7 +2392,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://192.168.1.7:5000","name":"whatslit","version":"0.0.0+fbe551bf","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+3ab006f6","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
