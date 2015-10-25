@@ -1410,7 +1410,7 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
   }()));
 
 });
-define('whatslit/templates/landing-index', ['exports'], function (exports) {
+define('whatslit/templates/index', ['exports'], function (exports) {
 
   'use strict';
 
@@ -1429,7 +1429,7 @@ define('whatslit/templates/landing-index', ['exports'], function (exports) {
             "column": 0
           }
         },
-        "moduleName": "whatslit/templates/landing-index.hbs"
+        "moduleName": "whatslit/templates/index.hbs"
       },
       arity: 0,
       cachedFragment: null,
