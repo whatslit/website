@@ -317,7 +317,16 @@ define('whatslit/models/event', ['exports', 'ember-data'], function (exports, DS
   'use strict';
 
   exports['default'] = DS['default'].Model.extend({
-    owner: DS['default'].belongsTo('user')
+    owner: DS['default'].belongsTo('user'),
+    name: DS['default'].attr('string'),
+    event_type: DS['default'].attr('string'),
+    was_remove: DS['default'].attr('boolean', { defaultValue: false }),
+    time_posted: DS['default'].attr('date'),
+    description: DS['default'].attr('description'),
+    //comments: DS.
+    latitude: DS['default'].attr('number'),
+    longitude: DS['default'].attr('number'),
+    score: DS['default'].attr('number')
   });
 
 });
@@ -2392,7 +2401,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+3ab006f6","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+b3b926d6","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
