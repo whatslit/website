@@ -39,7 +39,6 @@
     "ember-simple-auth": "1.0.1"
   },
   "dependencies": {
-    "ember-cli-animate-css": "0.0.1",
-    "ember-cli-htmlbars": "^1.0.1"
+    "ember-cli-animate-css": "0.0.1"
   }
 }
