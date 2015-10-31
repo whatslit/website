@@ -191,6 +191,13 @@ define('whatslit/components/main-navigation', ['exports', 'ember'], function (ex
 	});
 
 });
+define('whatslit/components/signup-form', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Component.extend({});
+
+});
 define('whatslit/controllers/application', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
@@ -1442,6 +1449,53 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
   }()));
 
 });
+define('whatslit/templates/components/signup-form', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    return {
+      meta: {
+        "revision": "Ember@1.13.7",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 0
+          }
+        },
+        "moduleName": "whatslit/templates/components/signup-form.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
+        dom.insertBoundary(fragment, 0);
+        return morphs;
+      },
+      statements: [
+        ["content","yield",["loc",[null,[1,0],[1,9]]]]
+      ],
+      locals: [],
+      templates: []
+    };
+  }()));
+
+});
 define('whatslit/templates/index', ['exports'], function (exports) {
 
   'use strict';
@@ -1681,6 +1735,16 @@ define('whatslit/tests/components/main-navigation.jshint', function () {
   QUnit.module('JSHint - components');
   QUnit.test('components/main-navigation.js should pass jshint', function(assert) { 
     assert.ok(false, 'components/main-navigation.js should pass jshint.\ncomponents/main-navigation.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/main-navigation.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/main-navigation.js: line 6, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/components/signup-form.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - components');
+  QUnit.test('components/signup-form.js should pass jshint', function(assert) { 
+    assert.ok(false, 'components/signup-form.js should pass jshint.\ncomponents/signup-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/signup-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
   });
 
 });
@@ -2092,6 +2156,149 @@ define('whatslit/tests/integration/components/main-navigation-test.jshint', func
   });
 
 });
+define('whatslit/tests/integration/components/signup-form-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleForComponent('signup-form', 'Integration | Component | signup form', {
+    integration: true
+  });
+
+  ember_qunit.test('it renders', function (assert) {
+    assert.expect(2);
+
+    // Set any properties with this.set('myProperty', 'value');
+    // Handle any actions with this.on('myAction', function(val) { ... });
+
+    this.render(Ember.HTMLBars.template((function () {
+      return {
+        meta: {
+          'revision': 'Ember@1.13.7',
+          'loc': {
+            'source': null,
+            'start': {
+              'line': 1,
+              'column': 0
+            },
+            'end': {
+              'line': 1,
+              'column': 15
+            }
+          }
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createComment('');
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [['content', 'signup-form', ['loc', [null, [1, 0], [1, 15]]]]],
+        locals: [],
+        templates: []
+      };
+    })()));
+
+    assert.equal(this.$().text().trim(), '');
+
+    // Template block usage:
+    this.render(Ember.HTMLBars.template((function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            'revision': 'Ember@1.13.7',
+            'loc': {
+              'source': null,
+              'start': {
+                'line': 2,
+                'column': 4
+              },
+              'end': {
+                'line': 4,
+                'column': 4
+              }
+            }
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode('      template block text\n');
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() {
+            return [];
+          },
+          statements: [],
+          locals: [],
+          templates: []
+        };
+      })();
+
+      return {
+        meta: {
+          'revision': 'Ember@1.13.7',
+          'loc': {
+            'source': null,
+            'start': {
+              'line': 1,
+              'column': 0
+            },
+            'end': {
+              'line': 5,
+              'column': 2
+            }
+          }
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode('\n');
+          dom.appendChild(el0, el1);
+          var el1 = dom.createComment('');
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode('  ');
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 1, 1, contextualElement);
+          return morphs;
+        },
+        statements: [['block', 'signup-form', [], [], 0, null, ['loc', [null, [2, 4], [4, 20]]]]],
+        locals: [],
+        templates: [child0]
+      };
+    })()));
+
+    assert.equal(this.$().text().trim(), 'template block text');
+  });
+
+});
+define('whatslit/tests/integration/components/signup-form-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - integration/components');
+  QUnit.test('integration/components/signup-form-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'integration/components/signup-form-test.js should pass jshint.'); 
+  });
+
+});
 define('whatslit/tests/models/event.jshint', function () {
 
   'use strict';
@@ -2401,7 +2608,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+b3b926d6","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+7fa5da47","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
