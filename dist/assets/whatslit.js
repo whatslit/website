@@ -371,29 +371,25 @@ define('whatslit/routes/about', ['exports', 'ember'], function (exports, Ember) 
 	exports['default'] = Ember['default'].Route.extend({});
 
 });
-define('whatslit/routes/application', ['exports', 'ember'], function (exports, Ember) {
+define('whatslit/routes/application', ['exports', 'ember', 'ember-simple-auth/mixins/application-route-mixin'], function (exports, Ember, ApplicationRouteMixin) {
 
 	'use strict';
 
-	exports['default'] = Ember['default'].Route.extend();
+	exports['default'] = Ember['default'].Route.extend(ApplicationRouteMixin['default']);
 
 });
-define('whatslit/routes/index', ['exports', 'ember'], function (exports, Ember) {
-
-  'use strict';
-
-  exports['default'] = Ember['default'].Route.extend({
-    model: function model() {
-      return ['red', 'green', 'blue'];
-    }
-  });
-
-});
-define('whatslit/routes/login', ['exports', 'ember'], function (exports, Ember) {
+define('whatslit/routes/index', ['exports', 'ember', 'ember-simple-auth/mixins/authenticated-route-mixin'], function (exports, Ember, AuthenticatedRouteMixin) {
 
 	'use strict';
 
-	exports['default'] = Ember['default'].Route.extend({});
+	exports['default'] = Ember['default'].Route.extend(AuthenticatedRouteMixin['default']);
+
+});
+define('whatslit/routes/login', ['exports', 'ember', 'ember-simple-auth/mixins/unauthenticated-route-mixin'], function (exports, Ember, UnauthenticatedRouteMixin) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Route.extend(UnauthenticatedRouteMixin['default']);
 
 });
 define('whatslit/serializers/application', ['exports', 'whatslit/serializers/drf'], function (exports, DRFSerializer) {
@@ -2339,13 +2335,23 @@ define('whatslit/tests/routes/about.jshint', function () {
   });
 
 });
+define('whatslit/tests/routes/application.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - routes');
+  QUnit.test('routes/application.js should pass jshint', function(assert) { 
+    assert.ok(false, 'routes/application.js should pass jshint.\nroutes/application.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/application.js: line 3, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/application.js: line 5, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+  });
+
+});
 define('whatslit/tests/routes/index.jshint', function () {
 
   'use strict';
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/index.js should pass jshint', function(assert) { 
-    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\nroutes/index.js: line 4, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
   });
 
 });
@@ -2355,7 +2361,7 @@ define('whatslit/tests/routes/login.jshint', function () {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/login.js should pass jshint', function(assert) { 
-    assert.ok(false, 'routes/login.js should pass jshint.\nroutes/login.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/login.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+    assert.ok(false, 'routes/login.js should pass jshint.\nroutes/login.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/login.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/login.js: line 6, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
   });
 
 });
@@ -2505,6 +2511,31 @@ define('whatslit/tests/unit/routes/about-test.jshint', function () {
   });
 
 });
+define('whatslit/tests/unit/routes/application-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:application', 'Unit | Route | application', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('whatslit/tests/unit/routes/application-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/routes');
+  QUnit.test('unit/routes/application-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/routes/application-test.js should pass jshint.'); 
+  });
+
+});
 define('whatslit/tests/unit/routes/index-test', ['ember-qunit'], function (ember_qunit) {
 
   'use strict';
@@ -2608,7 +2639,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+7fa5da47","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+3d8717fb","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
