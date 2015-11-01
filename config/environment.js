@@ -22,7 +22,7 @@ module.exports = function(environment) {
       'script-src': "'self' 'unsafe-inline' 'unsafe-eval' use.typekit.net connect.facebook.net maps.googleapis.com maps.gstatic.com",
       'font-src': "'self' data: use.typekit.net",
       'connect-src': "'self' 192.168.1.7 api.whatslit.io  192.168.1.7:5000 localhost:5000", //Questionable?
-      'img-src': "'self' www.facebook.com ",
+      'img-src': "'self' www.facebook.com csi.gstatic.com maps.googleapis.com data:",
       'style-src': "'self' 'unsafe-inline'",
       'frame-src': "s-static.ak.facebook.com static.ak.facebook.com www.facebook.com"
     },

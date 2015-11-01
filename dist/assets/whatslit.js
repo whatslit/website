@@ -130,6 +130,22 @@ define('whatslit/components/app-version', ['exports', 'ember-cli-app-version/com
   });
 
 });
+define('whatslit/components/events-map', ['exports', 'ember'], function (exports, Ember) {
+
+    'use strict';
+
+    exports['default'] = Ember['default'].Component.extend({
+        initMap: (function () {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                scrollwheel: false,
+                zoom: 8
+            });
+            console.log('loading map');
+        }).on('mapMade')
+    });
+
+});
 define('whatslit/components/login-form', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
@@ -781,6 +797,57 @@ define('whatslit/templates/application', ['exports'], function (exports) {
       statements: [
         ["content","main-navigation",["loc",[null,[1,0],[1,19]]]],
         ["content","outlet",["loc",[null,[4,1],[4,11]]]]
+      ],
+      locals: [],
+      templates: []
+    };
+  }()));
+
+});
+define('whatslit/templates/components/events-map', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    return {
+      meta: {
+        "revision": "Ember@1.13.7",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 4,
+            "column": 0
+          }
+        },
+        "moduleName": "whatslit/templates/components/events-map.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1,"class","map");
+        var el2 = dom.createTextNode("\n    ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("p");
+        var el3 = dom.createTextNode("lol");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes() { return []; },
+      statements: [
+
       ],
       locals: [],
       templates: []
@@ -1532,7 +1599,7 @@ define('whatslit/templates/index', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 6,
+            "line": 4,
             "column": 0
           }
         },
@@ -1543,20 +1610,26 @@ define('whatslit/templates/index', ['exports'], function (exports) {
       hasRendered: false,
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createTextNode("See what's lit tonight. You've logged in!\n\n");
+        var el1 = dom.createTextNode("See what's lit tonight. You've logged in!\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n\n");
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(1);
+        var morphs = new Array(2);
         morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+        morphs[1] = dom.createMorphAt(fragment,3,3,contextualElement);
         return morphs;
       },
       statements: [
+        ["content","events-map",["loc",[null,[2,0],[2,14]]]],
         ["content","outlet",["loc",[null,[3,0],[3,10]]]]
       ],
       locals: [],
@@ -1580,7 +1653,7 @@ define('whatslit/templates/landing', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 22,
+            "line": 23,
             "column": 0
           }
         },
@@ -1681,15 +1754,21 @@ define('whatslit/templates/landing', ['exports'], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(1);
+        var morphs = new Array(2);
         morphs[0] = dom.createMorphAt(fragment,3,3,contextualElement);
+        morphs[1] = dom.createMorphAt(fragment,5,5,contextualElement);
         return morphs;
       },
       statements: [
-        ["content","login-form",["loc",[null,[21,0],[21,14]]]]
+        ["content","login-form",["loc",[null,[21,0],[21,14]]]],
+        ["content","events-map",["loc",[null,[22,0],[22,14]]]]
       ],
       locals: [],
       templates: []
@@ -1778,6 +1857,16 @@ define('whatslit/tests/authorizers/django.jshint', function () {
   QUnit.module('JSHint - authorizers');
   QUnit.test('authorizers/django.js should pass jshint', function(assert) { 
     assert.ok(false, 'authorizers/django.js should pass jshint.\nauthorizers/django.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthorizers/django.js: line 5, col 4, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/components/events-map.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - components');
+  QUnit.test('components/events-map.js should pass jshint', function(assert) { 
+    assert.ok(false, 'components/events-map.js should pass jshint.\ncomponents/events-map.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 10, col 35, Missing semicolon.\n\n3 errors'); 
   });
 
 });
@@ -1930,6 +2019,149 @@ define('whatslit/tests/initializers/auth.jshint', function () {
   QUnit.module('JSHint - initializers');
   QUnit.test('initializers/auth.js should pass jshint', function(assert) { 
     assert.ok(false, 'initializers/auth.js should pass jshint.\ninitializers/auth.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ninitializers/auth.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+  });
+
+});
+define('whatslit/tests/integration/components/events-map-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleForComponent('events-map', 'Integration | Component | display map', {
+    integration: true
+  });
+
+  ember_qunit.test('it renders', function (assert) {
+    assert.expect(2);
+
+    // Set any properties with this.set('myProperty', 'value');
+    // Handle any actions with this.on('myAction', function(val) { ... });
+
+    this.render(Ember.HTMLBars.template((function () {
+      return {
+        meta: {
+          'revision': 'Ember@1.13.7',
+          'loc': {
+            'source': null,
+            'start': {
+              'line': 1,
+              'column': 0
+            },
+            'end': {
+              'line': 1,
+              'column': 14
+            }
+          }
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createComment('');
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [['content', 'events-map', ['loc', [null, [1, 0], [1, 14]]]]],
+        locals: [],
+        templates: []
+      };
+    })()));
+
+    assert.equal(this.$().text().trim(), '');
+
+    // Template block usage:
+    this.render(Ember.HTMLBars.template((function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            'revision': 'Ember@1.13.7',
+            'loc': {
+              'source': null,
+              'start': {
+                'line': 2,
+                'column': 4
+              },
+              'end': {
+                'line': 4,
+                'column': 4
+              }
+            }
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode('      template block text\n');
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() {
+            return [];
+          },
+          statements: [],
+          locals: [],
+          templates: []
+        };
+      })();
+
+      return {
+        meta: {
+          'revision': 'Ember@1.13.7',
+          'loc': {
+            'source': null,
+            'start': {
+              'line': 1,
+              'column': 0
+            },
+            'end': {
+              'line': 5,
+              'column': 2
+            }
+          }
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode('\n');
+          dom.appendChild(el0, el1);
+          var el1 = dom.createComment('');
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode('  ');
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 1, 1, contextualElement);
+          return morphs;
+        },
+        statements: [['block', 'events-map', [], [], 0, null, ['loc', [null, [2, 4], [4, 19]]]]],
+        locals: [],
+        templates: [child0]
+      };
+    })()));
+
+    assert.equal(this.$().text().trim(), 'template block text');
+  });
+
+});
+define('whatslit/tests/integration/components/events-map-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - integration/components');
+  QUnit.test('integration/components/events-map-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'integration/components/events-map-test.js should pass jshint.'); 
   });
 
 });
@@ -2741,7 +2973,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+3d8717fb","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+e1eec641","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
