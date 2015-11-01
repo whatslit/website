@@ -11,13 +11,14 @@
           <li>{{#link-to 'about'}}About{{/link-to}}</li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li>                 
+                         
           {{#if session.isAuthenticated}}
-            <a {{action 'invalidateSession'}}>Logout</a>
+              <li><a {{action 'invalidateSession'}}>Logout</a></li>
           {{else}}
-            {{#link-to 'login'}}Login{{/link-to}}
+            <li>{{#link-to 'signup'}}Sign Up{{/link-to}}</li>
+            <li>{{#link-to 'login'}}Login{{/link-to}}</li>
           {{/if}}
-          </li>
+          
         </ul>
       </div>
     </div>

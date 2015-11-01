@@ -9,6 +9,7 @@ Router.map(function() {
   this.route('/');
   this.route('login');
   this.route('about');
+  this.route('signup');
   this.route('landing',  {path: '/fire'});
 });
 
