@@ -359,6 +359,7 @@ define('whatslit/router', ['exports', 'ember', 'whatslit/config/environment'], f
     this.route('/');
     this.route('login');
     this.route('about');
+    this.route('landing', { path: '/fire' });
   });
 
   exports['default'] = Router;
@@ -378,11 +379,35 @@ define('whatslit/routes/application', ['exports', 'ember', 'ember-simple-auth/mi
 	exports['default'] = Ember['default'].Route.extend(ApplicationRouteMixin['default']);
 
 });
-define('whatslit/routes/index', ['exports', 'ember', 'ember-simple-auth/mixins/authenticated-route-mixin'], function (exports, Ember, AuthenticatedRouteMixin) {
+define('whatslit/routes/index', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
 
-	exports['default'] = Ember['default'].Route.extend(AuthenticatedRouteMixin['default']);
+	var service = Ember['default'].inject.service;
+
+	exports['default'] = Ember['default'].Route.extend({
+		session: service('session'),
+
+		beforeModel: function beforeModel(transition) {
+
+			//Transition to the landing page if you're authenticated.
+			if (!this.get('session').get('isAuthenticated')) {
+				console.log('Heading to landing page.');
+				transition.abort();
+				this.transitionTo('landing');
+			} else {
+				return this._super.apply(this, arguments);
+			}
+		}
+
+	});
+
+});
+define('whatslit/routes/landing', ['exports', 'ember', 'ember-simple-auth/mixins/unauthenticated-route-mixin'], function (exports, Ember, UnuthenticatedRouteMixin) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Route.extend(UnuthenticatedRouteMixin['default']);
 
 });
 define('whatslit/routes/login', ['exports', 'ember', 'ember-simple-auth/mixins/unauthenticated-route-mixin'], function (exports, Ember, UnauthenticatedRouteMixin) {
@@ -1507,11 +1532,59 @@ define('whatslit/templates/index', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 26,
+            "line": 6,
             "column": 0
           }
         },
         "moduleName": "whatslit/templates/index.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createTextNode("See what's lit tonight. You've logged in!\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+        return morphs;
+      },
+      statements: [
+        ["content","outlet",["loc",[null,[3,0],[3,10]]]]
+      ],
+      locals: [],
+      templates: []
+    };
+  }()));
+
+});
+define('whatslit/templates/landing', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    return {
+      meta: {
+        "revision": "Ember@1.13.7",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 22,
+            "column": 0
+          }
+        },
+        "moduleName": "whatslit/templates/landing.hbs"
       },
       arity: 0,
       cachedFragment: null,
@@ -1606,23 +1679,17 @@ define('whatslit/templates/index', ['exports'], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n\n");
+        var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(2);
+        var morphs = new Array(1);
         morphs[0] = dom.createMorphAt(fragment,3,3,contextualElement);
-        morphs[1] = dom.createMorphAt(fragment,5,5,contextualElement);
         return morphs;
       },
       statements: [
-        ["content","login-form",["loc",[null,[21,0],[21,14]]]],
-        ["content","outlet",["loc",[null,[23,0],[23,10]]]]
+        ["content","login-form",["loc",[null,[21,0],[21,14]]]]
       ],
       locals: [],
       templates: []
@@ -2321,7 +2388,7 @@ define('whatslit/tests/router.jshint', function () {
 
   QUnit.module('JSHint - .');
   QUnit.test('router.js should pass jshint', function(assert) { 
-    assert.ok(false, 'router.js should pass jshint.\nrouter.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 14, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+    assert.ok(false, 'router.js should pass jshint.\nrouter.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 15, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
   });
 
 });
@@ -2351,7 +2418,17 @@ define('whatslit/tests/routes/index.jshint', function () {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/index.js should pass jshint', function(assert) { 
-    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 3, col 1, \'const\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 3, col 1, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 6, col 1, \'export\' is only available in ES6 (use esnext option).\nroutes/index.js: line 10, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 18, col 30, \'spread/rest operator\' is only available in ES6 (use esnext option).\n\n6 errors'); 
+  });
+
+});
+define('whatslit/tests/routes/landing.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - routes');
+  QUnit.test('routes/landing.js should pass jshint', function(assert) { 
+    assert.ok(false, 'routes/landing.js should pass jshint.\nroutes/landing.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/landing.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/landing.js: line 5, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
   });
 
 });
@@ -2558,6 +2635,31 @@ define('whatslit/tests/unit/routes/index-test.jshint', function () {
   QUnit.module('JSHint - unit/routes');
   QUnit.test('unit/routes/index-test.js should pass jshint', function(assert) { 
     assert.ok(true, 'unit/routes/index-test.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/routes/landing-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:landing', 'Unit | Route | landing', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('whatslit/tests/unit/routes/landing-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/routes');
+  QUnit.test('unit/routes/landing-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/routes/landing-test.js should pass jshint.'); 
   });
 
 });

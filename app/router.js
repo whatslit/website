@@ -9,6 +9,7 @@ Router.map(function() {
   this.route('/');
   this.route('login');
   this.route('about');
+  this.route('landing',  {path: '/fire'});
 });
 
 export default Router;
