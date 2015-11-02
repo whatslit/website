@@ -39,8 +39,6 @@ export default Base.extend({
   	  }, function(xhr, status, error) {
   	    Ember.run(function() {
 
-
-
           //ON FAILURE
   	      reject(xhr.responseJSON 
   	      	|| error);

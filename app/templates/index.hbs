@@ -3,7 +3,9 @@ See what's lit tonight. You've logged in!
 {{outlet}}
 
 {{#each model as |user|}}
+	{{#each user.events as |event|}}
     <li>
-      <label>{{user.email}}</label>
+      <label>{{user.username}} {{event.name}}</label>
     </li>
+    {{/each}}
 {{/each}}
