@@ -207,13 +207,6 @@ define('whatslit/components/main-navigation', ['exports', 'ember'], function (ex
 	});
 
 });
-define('whatslit/components/signup-form', ['exports', 'ember'], function (exports, Ember) {
-
-	'use strict';
-
-	exports['default'] = Ember['default'].Component.extend({});
-
-});
 define('whatslit/controllers/application', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
@@ -246,7 +239,11 @@ define('whatslit/controllers/signup', ['exports', 'ember'], function (exports, E
 
 	'use strict';
 
-	exports['default'] = Ember['default'].Controller.extend({});
+	exports['default'] = Ember['default'].Controller.extend({
+		actions: {
+			register: function register() {}
+		}
+	});
 
 });
 define('whatslit/initializers/app-version', ['exports', 'ember-cli-app-version/initializer-factory', 'whatslit/config/environment'], function (exports, initializerFactory, config) {
@@ -1592,53 +1589,6 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
   }()));
 
 });
-define('whatslit/templates/components/signup-form', ['exports'], function (exports) {
-
-  'use strict';
-
-  exports['default'] = Ember.HTMLBars.template((function() {
-    return {
-      meta: {
-        "revision": "Ember@1.13.7",
-        "loc": {
-          "source": null,
-          "start": {
-            "line": 1,
-            "column": 0
-          },
-          "end": {
-            "line": 2,
-            "column": 0
-          }
-        },
-        "moduleName": "whatslit/templates/components/signup-form.hbs"
-      },
-      arity: 0,
-      cachedFragment: null,
-      hasRendered: false,
-      buildFragment: function buildFragment(dom) {
-        var el0 = dom.createDocumentFragment();
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        return el0;
-      },
-      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(1);
-        morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
-        dom.insertBoundary(fragment, 0);
-        return morphs;
-      },
-      statements: [
-        ["content","yield",["loc",[null,[1,0],[1,9]]]]
-      ],
-      locals: [],
-      templates: []
-    };
-  }()));
-
-});
 define('whatslit/templates/index', ['exports'], function (exports) {
 
   'use strict';
@@ -2398,16 +2348,6 @@ define('whatslit/tests/components/main-navigation.jshint', function () {
   });
 
 });
-define('whatslit/tests/components/signup-form.jshint', function () {
-
-  'use strict';
-
-  QUnit.module('JSHint - components');
-  QUnit.test('components/signup-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/signup-form.js should pass jshint.\ncomponents/signup-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/signup-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
-  });
-
-});
 define('whatslit/tests/controllers/application.jshint', function () {
 
   'use strict';
@@ -2424,7 +2364,7 @@ define('whatslit/tests/controllers/signup.jshint', function () {
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/signup.js should pass jshint', function(assert) { 
-    assert.ok(false, 'controllers/signup.js should pass jshint.\ncontrollers/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+    assert.ok(false, 'controllers/signup.js should pass jshint.\ncontrollers/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 5, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
   });
 
 });
