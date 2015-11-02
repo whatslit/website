@@ -11,6 +11,7 @@ Router.map(function() {
   this.route('about');
   this.route('signup');
   this.route('landing',  {path: '/fire'});
+  this.route('profile');
 });
 
 export default Router;
