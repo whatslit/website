@@ -91,7 +91,6 @@ define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenti
     invalidate: function invalidate() {
       function success(resolve) {
         resolve();
-        //TODO: clear token online if needed.
       }
       return new Ember.RSVP.Promise(function (resolve, reject) {
         success(resolve);
@@ -153,25 +152,23 @@ define('whatslit/components/login-form', ['exports', 'ember'], function (exports
 	exports['default'] = Ember['default'].Component.extend({
 			session: Ember['default'].inject.service('session'),
 
+			/* Actions for the login form */
 			actions: {
+					/* Authenticates the user */
 					authenticate: function authenticate() {
 							var _this = this;
 
-							var _getProperties = this.getProperties('identification', 'password');
+							var data = this.getProperties('username', 'password');
 
-							var identification = _getProperties.identification;
-							var password = _getProperties.password;
-
-							var options = { identification: identification, password: password };
-
-							this.get('session').authenticate('authenticator:django', options).then(function () {
+							this.get('session').authenticate('authenticator:django', {
+									identification: data.username,
+									password: data.password
+							}).then(function () {
 									//ON SUCCESS
 									//Clear error messages.
 									_this.set('loginError', null);
 									_this.set('passwordError', null);
 									_this.set('errorMessages', null);
-
-									console.log(_this.get('session.data'));
 							})['catch'](function (reason) {
 									//ON ERROR
 
@@ -207,13 +204,6 @@ define('whatslit/components/main-navigation', ['exports', 'ember'], function (ex
 	});
 
 });
-define('whatslit/components/signup-form', ['exports', 'ember'], function (exports, Ember) {
-
-	'use strict';
-
-	exports['default'] = Ember['default'].Component.extend({});
-
-});
 define('whatslit/controllers/application', ['exports', 'ember'], function (exports, Ember) {
 
 	'use strict';
@@ -240,6 +230,71 @@ define('whatslit/controllers/object', ['exports', 'ember'], function (exports, E
 	'use strict';
 
 	exports['default'] = Ember['default'].Controller;
+
+});
+define('whatslit/controllers/signup', ['exports', 'ember'], function (exports, Ember) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Controller.extend({
+		/*
+	  * THe ember session.
+	  */
+		session: Ember['default'].inject.service('session'),
+
+		/* Initializes the api user endpoint */
+		init: function init() {
+			this.apiUserEndpoint = window.ENV.APP.ENDPOINTS.user;
+		},
+
+		/* The actions for the controller */
+		actions: {
+			/*
+	   * Registers a user by making a POST request to the API.
+	   */
+			register: function register() {
+				var _this2 = this;
+
+				var _this = this;
+				var data = this.getProperties("username", "email", "password");
+				data.events = [];
+
+				//Send request.
+				Ember['default'].$.ajax({
+					url: _this.apiUserEndpoint,
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					timeout: 3000,
+					contentType: 'application/x-www-form-urlencoded'
+				}).then(function (resp, textStatus, jqXHR) {
+					_this.get('session').authenticate('authenticator:django', {
+						identification: data.username,
+						password: data.password
+					});
+				}, function (jqXHR, textStatus, errorThrown) {
+					var reason = jqXHR.responseJSON || errorThrown;
+
+					//SET ERROR TEXTS!
+					if (reason == "timeout") _this2.set('errorMessages', ["Connection to server timed out! ABORT."]);else {
+						//In the case that a legitmate error has been received.
+						_this2.set('usernameError', null);
+						_this2.set('emailError', null);
+						_this2.set('passwordError', null);
+						_this2.set('errorMessages', null);
+
+						if (reason.username) _this2.set('usernameError', reason.username[0]);
+
+						if (reason.email) _this2.set('emailError', reason.email[0]);
+
+						if (reason.password) _this2.set('passwordError', reason.password[0]);
+
+						if (reason.non_field_errors) _this2.set('errorMessages', reason.non_field_errors);
+					}
+				});
+			}
+		}
+	});
 
 });
 define('whatslit/initializers/app-version', ['exports', 'ember-cli-app-version/initializer-factory', 'whatslit/config/environment'], function (exports, initializerFactory, config) {
@@ -375,6 +430,7 @@ define('whatslit/router', ['exports', 'ember', 'whatslit/config/environment'], f
     this.route('/');
     this.route('login');
     this.route('about');
+    this.route('signup');
     this.route('landing', { path: '/fire' });
   });
 
@@ -427,6 +483,13 @@ define('whatslit/routes/landing', ['exports', 'ember', 'ember-simple-auth/mixins
 
 });
 define('whatslit/routes/login', ['exports', 'ember', 'ember-simple-auth/mixins/unauthenticated-route-mixin'], function (exports, Ember, UnauthenticatedRouteMixin) {
+
+	'use strict';
+
+	exports['default'] = Ember['default'].Route.extend(UnauthenticatedRouteMixin['default']);
+
+});
+define('whatslit/routes/signup', ['exports', 'ember', 'ember-simple-auth/mixins/unauthenticated-route-mixin'], function (exports, Ember, UnauthenticatedRouteMixin) {
 
 	'use strict';
 
@@ -1081,7 +1144,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         var el3 = dom.createTextNode("\n    ");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("label");
-        dom.setAttribute(el3,"for","identification");
+        dom.setAttribute(el3,"for","username");
         var el4 = dom.createTextNode("\n      Login\n");
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("");
@@ -1148,7 +1211,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         ["element","action",["authenticate"],["on","submit"],["loc",[null,[2,6],[2,43]]]],
         ["block","if",[["get","errorMessages",["loc",[null,[3,8],[3,21]]]]],[],0,null,["loc",[null,[3,2],[10,9]]]],
         ["block","if",[["get","loginError",["loc",[null,[15,12],[15,22]]]]],[],1,null,["loc",[null,[15,6],[17,13]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[19,18],[19,32]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[19,4],[19,81]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","username",["loc",[null,[19,18],[19,26]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[19,4],[19,75]]]],
         ["block","if",[["get","passwordError",["loc",[null,[24,12],[24,25]]]]],[],2,null,["loc",[null,[24,6],[26,13]]]],
         ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[28,18],[28,26]]]]],[],[]],"placeholder","Enter Password","class","form-control","type","password"],["loc",[null,[28,4],[28,94]]]]
       ],
@@ -1287,10 +1350,12 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("            ");
+          var el1 = dom.createTextNode("              ");
           dom.appendChild(el0, el1);
-          var el1 = dom.createElement("a");
-          var el2 = dom.createTextNode("Logout");
+          var el1 = dom.createElement("li");
+          var el2 = dom.createElement("a");
+          var el3 = dom.createTextNode("Logout");
+          dom.appendChild(el2, el3);
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
           var el1 = dom.createTextNode("\n");
@@ -1298,13 +1363,13 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
           return el0;
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var element0 = dom.childAt(fragment, [1]);
+          var element0 = dom.childAt(fragment, [1, 0]);
           var morphs = new Array(1);
           morphs[0] = dom.createElementMorph(element0);
           return morphs;
         },
         statements: [
-          ["element","action",["invalidateSession"],[],["loc",[null,[16,15],[16,45]]]]
+          ["element","action",["invalidateSession"],[],["loc",[null,[16,21],[16,51]]]]
         ],
         locals: [],
         templates: []
@@ -1319,11 +1384,45 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
               "source": null,
               "start": {
                 "line": 18,
-                "column": 12
+                "column": 16
               },
               "end": {
                 "line": 18,
-                "column": 37
+                "column": 44
+              }
+            },
+            "moduleName": "whatslit/templates/components/main-navigation.hbs"
+          },
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("Sign Up");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() { return []; },
+          statements: [
+
+          ],
+          locals: [],
+          templates: []
+        };
+      }());
+      var child1 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.7",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 19,
+                "column": 16
+              },
+              "end": {
+                "line": 19,
+                "column": 41
               }
             },
             "moduleName": "whatslit/templates/components/main-navigation.hbs"
@@ -1355,7 +1454,7 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
               "column": 10
             },
             "end": {
-              "line": 19,
+              "line": 20,
               "column": 10
             }
           },
@@ -1368,22 +1467,32 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
           var el0 = dom.createDocumentFragment();
           var el1 = dom.createTextNode("            ");
           dom.appendChild(el0, el1);
-          var el1 = dom.createComment("");
+          var el1 = dom.createElement("li");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n            ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("li");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
           var el1 = dom.createTextNode("\n");
           dom.appendChild(el0, el1);
           return el0;
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
+          var morphs = new Array(2);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          morphs[1] = dom.createMorphAt(dom.childAt(fragment, [3]),0,0);
           return morphs;
         },
         statements: [
-          ["block","link-to",["login"],[],0,null,["loc",[null,[18,12],[18,49]]]]
+          ["block","link-to",["signup"],[],0,null,["loc",[null,[18,16],[18,56]]]],
+          ["block","link-to",["login"],[],1,null,["loc",[null,[19,16],[19,53]]]]
         ],
         locals: [],
-        templates: [child0]
+        templates: [child0, child1]
       };
     }());
     return {
@@ -1396,7 +1505,7 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
             "column": 0
           },
           "end": {
-            "line": 24,
+            "line": 25,
             "column": 8
           }
         },
@@ -1490,17 +1599,11 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
         dom.appendChild(el3, el4);
         var el4 = dom.createElement("ul");
         dom.setAttribute(el4,"class","nav navbar-nav navbar-right");
-        var el5 = dom.createTextNode("\n          ");
+        var el5 = dom.createTextNode("\n                         \n");
         dom.appendChild(el4, el5);
-        var el5 = dom.createElement("li");
-        var el6 = dom.createTextNode("                 \n");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createComment("");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("          ");
-        dom.appendChild(el5, el6);
+        var el5 = dom.createComment("");
         dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n        ");
+        var el5 = dom.createTextNode("          \n        ");
         dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
         var el4 = dom.createTextNode("\n      ");
@@ -1522,64 +1625,17 @@ define('whatslit/templates/components/main-navigation', ['exports'], function (e
         morphs[0] = dom.createMorphAt(dom.childAt(element1, [1]),3,3);
         morphs[1] = dom.createMorphAt(dom.childAt(element3, [1]),0,0);
         morphs[2] = dom.createMorphAt(dom.childAt(element3, [3]),0,0);
-        morphs[3] = dom.createMorphAt(dom.childAt(element2, [3, 1]),1,1);
+        morphs[3] = dom.createMorphAt(dom.childAt(element2, [3]),1,1);
         return morphs;
       },
       statements: [
         ["block","link-to",["index"],["class","navbar-brand"],0,null,["loc",[null,[5,8],[5,72]]]],
         ["block","link-to",["index"],[],1,null,["loc",[null,[10,14],[10,50]]]],
         ["block","link-to",["about"],[],2,null,["loc",[null,[11,14],[11,51]]]],
-        ["block","if",[["get","session.isAuthenticated",["loc",[null,[15,16],[15,39]]]]],[],3,4,["loc",[null,[15,10],[19,17]]]]
+        ["block","if",[["get","session.isAuthenticated",["loc",[null,[15,16],[15,39]]]]],[],3,4,["loc",[null,[15,10],[20,17]]]]
       ],
       locals: [],
       templates: [child0, child1, child2, child3, child4]
-    };
-  }()));
-
-});
-define('whatslit/templates/components/signup-form', ['exports'], function (exports) {
-
-  'use strict';
-
-  exports['default'] = Ember.HTMLBars.template((function() {
-    return {
-      meta: {
-        "revision": "Ember@1.13.7",
-        "loc": {
-          "source": null,
-          "start": {
-            "line": 1,
-            "column": 0
-          },
-          "end": {
-            "line": 2,
-            "column": 0
-          }
-        },
-        "moduleName": "whatslit/templates/components/signup-form.hbs"
-      },
-      arity: 0,
-      cachedFragment: null,
-      hasRendered: false,
-      buildFragment: function buildFragment(dom) {
-        var el0 = dom.createDocumentFragment();
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        return el0;
-      },
-      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(1);
-        morphs[0] = dom.createMorphAt(fragment,0,0,contextualElement);
-        dom.insertBoundary(fragment, 0);
-        return morphs;
-      },
-      statements: [
-        ["content","yield",["loc",[null,[1,0],[1,9]]]]
-      ],
-      locals: [],
-      templates: []
     };
   }()));
 
@@ -1653,7 +1709,7 @@ define('whatslit/templates/landing', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 23,
+            "line": 22,
             "column": 0
           }
         },
@@ -1754,21 +1810,15 @@ define('whatslit/templates/landing', ['exports'], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(2);
+        var morphs = new Array(1);
         morphs[0] = dom.createMorphAt(fragment,3,3,contextualElement);
-        morphs[1] = dom.createMorphAt(fragment,5,5,contextualElement);
         return morphs;
       },
       statements: [
-        ["content","login-form",["loc",[null,[21,0],[21,14]]]],
-        ["content","events-map",["loc",[null,[22,0],[22,14]]]]
+        ["content","login-form",["loc",[null,[21,0],[21,14]]]]
       ],
       locals: [],
       templates: []
@@ -1830,6 +1880,388 @@ define('whatslit/templates/login', ['exports'], function (exports) {
   }()));
 
 });
+define('whatslit/templates/signup', ['exports'], function (exports) {
+
+  'use strict';
+
+  exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      var child0 = (function() {
+        return {
+          meta: {
+            "revision": "Ember@1.13.7",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 5,
+                "column": 6
+              },
+              "end": {
+                "line": 7,
+                "column": 6
+              }
+            },
+            "moduleName": "whatslit/templates/signup.hbs"
+          },
+          arity: 1,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("        ");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("li");
+            var el2 = dom.createElement("code");
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 0]),0,0);
+            return morphs;
+          },
+          statements: [
+            ["content","error",["loc",[null,[6,18],[6,27]]]]
+          ],
+          locals: ["error"],
+          templates: []
+        };
+      }());
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 2,
+              "column": 2
+            },
+            "end": {
+              "line": 9,
+              "column": 2
+            }
+          },
+          "moduleName": "whatslit/templates/signup.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("    ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("strong");
+          var el2 = dom.createTextNode(" Sign up failed: ");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n    ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("ul");
+          var el2 = dom.createTextNode("\n");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("    ");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [3]),1,1);
+          return morphs;
+        },
+        statements: [
+          ["block","each",[["get","errorMessages",["loc",[null,[5,14],[5,27]]]]],[],0,null,["loc",[null,[5,6],[7,15]]]]
+        ],
+        locals: [],
+        templates: [child0]
+      };
+    }());
+    var child1 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 13,
+              "column": 8
+            },
+            "end": {
+              "line": 15,
+              "column": 8
+            }
+          },
+          "moduleName": "whatslit/templates/signup.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("          ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","usernameError",["loc",[null,[14,16],[14,33]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    var child2 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 22,
+              "column": 10
+            },
+            "end": {
+              "line": 24,
+              "column": 10
+            }
+          },
+          "moduleName": "whatslit/templates/signup.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("            ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","emailError",["loc",[null,[23,18],[23,32]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    var child3 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 31,
+              "column": 8
+            },
+            "end": {
+              "line": 33,
+              "column": 8
+            }
+          },
+          "moduleName": "whatslit/templates/signup.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("          ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","passwordError",["loc",[null,[32,16],[32,33]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    return {
+      meta: {
+        "revision": "Ember@1.13.7",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 42,
+            "column": 0
+          }
+        },
+        "moduleName": "whatslit/templates/signup.hbs"
+      },
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("form");
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("      ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","form-group");
+        var el3 = dom.createTextNode("\n      ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("label");
+        dom.setAttribute(el3,"for","username");
+        var el4 = dom.createTextNode("\n        Username:\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("      ");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n      ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createComment("");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n    ");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n    ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","form-group");
+        var el3 = dom.createTextNode("\n        ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("label");
+        dom.setAttribute(el3,"for","email");
+        var el4 = dom.createTextNode("\n          Email Address:\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("        ");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n        ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createComment("");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n    ");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n    ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","form-group");
+        var el3 = dom.createTextNode("\n      ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("label");
+        dom.setAttribute(el3,"for","password");
+        var el4 = dom.createTextNode("\n        Password:\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("      ");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n      ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createComment("");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n\n    ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("button");
+        dom.setAttribute(el2,"type","submit");
+        dom.setAttribute(el2,"class","btn btn-default");
+        var el3 = dom.createTextNode("Sign up");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var element0 = dom.childAt(fragment, [0]);
+        var element1 = dom.childAt(element0, [3]);
+        var element2 = dom.childAt(element0, [5]);
+        var element3 = dom.childAt(element0, [7]);
+        var morphs = new Array(9);
+        morphs[0] = dom.createElementMorph(element0);
+        morphs[1] = dom.createMorphAt(element0,1,1);
+        morphs[2] = dom.createMorphAt(dom.childAt(element1, [1]),1,1);
+        morphs[3] = dom.createMorphAt(element1,3,3);
+        morphs[4] = dom.createMorphAt(dom.childAt(element2, [1]),1,1);
+        morphs[5] = dom.createMorphAt(element2,3,3);
+        morphs[6] = dom.createMorphAt(dom.childAt(element3, [1]),1,1);
+        morphs[7] = dom.createMorphAt(element3,3,3);
+        morphs[8] = dom.createMorphAt(fragment,2,2,contextualElement);
+        return morphs;
+      },
+      statements: [
+        ["element","action",["register"],["on","submit"],["loc",[null,[1,6],[1,39]]]],
+        ["block","if",[["get","errorMessages",["loc",[null,[2,8],[2,21]]]]],[],0,null,["loc",[null,[2,2],[9,9]]]],
+        ["block","if",[["get","usernameError",["loc",[null,[13,14],[13,27]]]]],[],1,null,["loc",[null,[13,8],[15,15]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","username",["loc",[null,[17,20],[17,28]]]]],[],[]],"placeholder","TurntAF420","class","form-control"],["loc",[null,[17,6],[17,76]]]],
+        ["block","if",[["get","emailError",["loc",[null,[22,16],[22,26]]]]],[],2,null,["loc",[null,[22,10],[24,17]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","email",["loc",[null,[26,22],[26,27]]]]],[],[]],"placeholder","partier@whatslit.io","class","form-control"],["loc",[null,[26,8],[26,84]]]],
+        ["block","if",[["get","passwordError",["loc",[null,[31,14],[31,27]]]]],[],3,null,["loc",[null,[31,8],[33,15]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[35,20],[35,28]]]]],[],[]],"placeholder","Password","class","form-control","type","password"],["loc",[null,[35,6],[35,90]]]],
+        ["content","outlet",["loc",[null,[41,0],[41,10]]]]
+      ],
+      locals: [],
+      templates: [child0, child1, child2, child3]
+    };
+  }()));
+
+});
 define('whatslit/tests/app.jshint', function () {
 
   'use strict';
@@ -1866,7 +2298,7 @@ define('whatslit/tests/components/events-map.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/events-map.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/events-map.js should pass jshint.\ncomponents/events-map.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
+    assert.ok(false, 'components/events-map.js should pass jshint.\ncomponents/events-map.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 10, col 35, Missing semicolon.\n\n3 errors'); 
   });
 
 });
@@ -1876,7 +2308,7 @@ define('whatslit/tests/components/login-form.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/login-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 22, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 38, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 18, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 21, col 50, Missing semicolon.\ncomponents/login-form.js: line 22, col 27, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n10 errors'); 
+    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 9, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 18, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 21, col 27, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n5 errors'); 
   });
 
 });
@@ -1890,16 +2322,6 @@ define('whatslit/tests/components/main-navigation.jshint', function () {
   });
 
 });
-define('whatslit/tests/components/signup-form.jshint', function () {
-
-  'use strict';
-
-  QUnit.module('JSHint - components');
-  QUnit.test('components/signup-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/signup-form.js should pass jshint.\ncomponents/signup-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/signup-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
-  });
-
-});
 define('whatslit/tests/controllers/application.jshint', function () {
 
   'use strict';
@@ -1907,6 +2329,16 @@ define('whatslit/tests/controllers/application.jshint', function () {
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/application.js should pass jshint', function(assert) { 
     assert.ok(false, 'controllers/application.js should pass jshint.\ncontrollers/application.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncontrollers/application.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncontrollers/application.js: line 6, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/controllers/signup.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - controllers');
+  QUnit.test('controllers/signup.js should pass jshint', function(assert) { 
+    assert.ok(false, 'controllers/signup.js should pass jshint.\ncontrollers/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 10, col 7, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncontrollers/signup.js: line 19, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncontrollers/signup.js: line 34, col 45, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 40, col 52, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n6 errors'); 
   });
 
 });
@@ -2620,7 +3052,7 @@ define('whatslit/tests/router.jshint', function () {
 
   QUnit.module('JSHint - .');
   QUnit.test('router.js should pass jshint', function(assert) { 
-    assert.ok(false, 'router.js should pass jshint.\nrouter.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 15, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+    assert.ok(false, 'router.js should pass jshint.\nrouter.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nrouter.js: line 16, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
   });
 
 });
@@ -2671,6 +3103,16 @@ define('whatslit/tests/routes/login.jshint', function () {
   QUnit.module('JSHint - routes');
   QUnit.test('routes/login.js should pass jshint', function(assert) { 
     assert.ok(false, 'routes/login.js should pass jshint.\nroutes/login.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/login.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/login.js: line 6, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/routes/signup.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - routes');
+  QUnit.test('routes/signup.js should pass jshint', function(assert) { 
+    assert.ok(false, 'routes/signup.js should pass jshint.\nroutes/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/signup.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/signup.js: line 5, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
   });
 
 });
@@ -2740,6 +3182,32 @@ define('whatslit/tests/unit/controllers/login-form-controller-test.jshint', func
   QUnit.module('JSHint - unit/controllers');
   QUnit.test('unit/controllers/login-form-controller-test.js should pass jshint', function(assert) { 
     assert.ok(true, 'unit/controllers/login-form-controller-test.js should pass jshint.'); 
+  });
+
+});
+define('whatslit/tests/unit/controllers/signup-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('controller:signup', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  // Replace this with your real tests.
+  ember_qunit.test('it exists', function (assert) {
+    var controller = this.subject();
+    assert.ok(controller);
+  });
+
+});
+define('whatslit/tests/unit/controllers/signup-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/controllers');
+  QUnit.test('unit/controllers/signup-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/controllers/signup-test.js should pass jshint.'); 
   });
 
 });
@@ -2920,6 +3388,31 @@ define('whatslit/tests/unit/routes/login-test.jshint', function () {
   });
 
 });
+define('whatslit/tests/unit/routes/signup-test', ['ember-qunit'], function (ember_qunit) {
+
+  'use strict';
+
+  ember_qunit.moduleFor('route:signup', 'Unit | Route | signup', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  ember_qunit.test('it exists', function (assert) {
+    var route = this.subject();
+    assert.ok(route);
+  });
+
+});
+define('whatslit/tests/unit/routes/signup-test.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - unit/routes');
+  QUnit.test('unit/routes/signup-test.js should pass jshint', function(assert) { 
+    assert.ok(true, 'unit/routes/signup-test.js should pass jshint.'); 
+  });
+
+});
 define('whatslit/tests/unit/routes/test-test', ['ember-qunit'], function (ember_qunit) {
 
   'use strict';
@@ -2973,7 +3466,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+7ad70987","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","ENDPOINTS":{"user":"http://localhost:5000/users/"},"name":"whatslit","version":"0.0.0+0d6eaf25","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
