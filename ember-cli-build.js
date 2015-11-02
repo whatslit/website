@@ -28,6 +28,7 @@ module.exports = function(defaults) {
 
   app.import('vendor/jquery.fittext.js');
   app.import('vendor/jquery.easing.js');
+  app.import('vendor/videobg.js');
 
 
   return app.toTree();

@@ -1,41 +1,46 @@
-<form {{action 'register' on='submit'}}>
-  {{#if errorMessages}}
-    <strong> Sign up failed: </strong>
-    <ul>
-      {{#each errorMessages as |error|}}
-        <li><code>{{error}}</code></li>
-      {{/each}}
-    </ul>
-  {{/if}}
-      <div class="form-group">
-      <label for="username">
-        Username:
-        {{#if usernameError}}
-          <code>{{usernameError}}</code>
-        {{/if}}
-      </label>
-      {{input value=username placeholder='TurntAF420' class='form-control'}}
-    </div>
-    <div class="form-group">
-        <label for="email">
-          Email Address:
-          {{#if emailError}}
-            <code>{{emailError}}</code>
+<div class="container">
+
+
+  <form {{action 'register' on='submit'}}>
+    {{#if errorMessages}}
+      <strong> Sign up failed: </strong>
+      <ul>
+        {{#each errorMessages as |error|}}
+          <li><code>{{error}}</code></li>
+        {{/each}}
+      </ul>
+    {{/if}}
+        <div class="form-group">
+        <label for="username">
+          Username:
+          {{#if usernameError}}
+            <code>{{usernameError}}</code>
           {{/if}}
         </label>
-        {{input value=email placeholder='partier@whatslit.io' class='form-control'}}
-    </div>
-    <div class="form-group">
-      <label for="password">
-        Password:
-        {{#if passwordError}}
-          <code>{{passwordError}}</code>
-        {{/if}}
-      </label>
-      {{input value=password placeholder='Password' class='form-control' type='password'}}
-		</div>
+        {{input value=username placeholder='TurntAF420' class='form-control'}}
+      </div>
+      <div class="form-group">
+          <label for="email">
+            Email Address:
+            {{#if emailError}}
+              <code>{{emailError}}</code>
+            {{/if}}
+          </label>
+          {{input value=email placeholder='partier@whatslit.io' class='form-control'}}
+      </div>
+      <div class="form-group">
+        <label for="password">
+          Password:
+          {{#if passwordError}}
+            <code>{{passwordError}}</code>
+          {{/if}}
+        </label>
+        {{input value=password placeholder='Password' class='form-control' type='password'}}
+  		</div>
 
-    <button type="submit" class="btn btn-default">Sign up</button>
-</form>
+      <button type="submit" class="btn btn-default">Sign up</button>
+  </form>
 
-{{outlet}}
+  {{outlet}}
+
+</div>
