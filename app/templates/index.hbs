@@ -1,3 +1,9 @@
 See what's lit tonight. You've logged in!
 {{events-map}}
 {{outlet}}
+
+{{#each user in model}}
+    <li>
+      <label>{{user.email}}</label>
+    </li>
+{{/each}}

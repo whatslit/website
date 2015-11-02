@@ -82,6 +82,7 @@ define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenti
           });
         }, function (xhr, status, error) {
           Ember.run(function () {
+
             //ON FAILURE
             reject(xhr.responseJSON || error);
           });
@@ -413,8 +414,9 @@ define('whatslit/models/user', ['exports', 'ember-data'], function (exports, DS)
 	'use strict';
 
 	exports['default'] = DS['default'].Model.extend({
-		username: DS['default'].attr('string')
-
+		username: DS['default'].attr('string'),
+		email: DS['default'].attr('string'),
+		events: DS['default'].hasMany('events', { async: true })
 	});
 
 });
@@ -470,6 +472,10 @@ define('whatslit/routes/index', ['exports', 'ember'], function (exports, Ember) 
 			} else {
 				return this._super.apply(this, arguments);
 			}
+		},
+
+		model: function model() {
+			return this.store.findAll('user');
 		}
 
 	});
@@ -508,6 +514,13 @@ define('whatslit/serializers/drf', ['exports', 'ember-django-adapter/serializers
 	'use strict';
 
 	exports['default'] = DRFSerializer['default'];
+
+});
+define('whatslit/serializers/user', ['exports', 'whatslit/serializers/drf'], function (exports, DRFSerializer) {
+
+	'use strict';
+
+	exports['default'] = DRFSerializer['default'].extend({});
 
 });
 define('whatslit/services/session', ['exports', 'ember-simple-auth/services/session'], function (exports, SessionService) {
@@ -1645,6 +1658,56 @@ define('whatslit/templates/index', ['exports'], function (exports) {
   'use strict';
 
   exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 5,
+              "column": 0
+            },
+            "end": {
+              "line": 9,
+              "column": 0
+            }
+          },
+          "moduleName": "whatslit/templates/index.hbs"
+        },
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("    ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("li");
+          var el2 = dom.createTextNode("\n      ");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("label");
+          var el3 = dom.createComment("");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n    ");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","user.email",["loc",[null,[7,13],[7,27]]]]
+        ],
+        locals: ["user"],
+        templates: []
+      };
+    }());
     return {
       meta: {
         "revision": "Ember@1.13.7",
@@ -1655,8 +1718,8 @@ define('whatslit/templates/index', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 4,
-            "column": 0
+            "line": 9,
+            "column": 9
           }
         },
         "moduleName": "whatslit/templates/index.hbs"
@@ -1674,22 +1737,27 @@ define('whatslit/templates/index', ['exports'], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(2);
+        var morphs = new Array(3);
         morphs[0] = dom.createMorphAt(fragment,1,1,contextualElement);
         morphs[1] = dom.createMorphAt(fragment,3,3,contextualElement);
+        morphs[2] = dom.createMorphAt(fragment,5,5,contextualElement);
+        dom.insertBoundary(fragment, null);
         return morphs;
       },
       statements: [
         ["content","events-map",["loc",[null,[2,0],[2,14]]]],
-        ["content","outlet",["loc",[null,[3,0],[3,10]]]]
+        ["content","outlet",["loc",[null,[3,0],[3,10]]]],
+        ["block","each",[["get","model",["loc",[null,[5,16],[5,21]]]]],[],0,null,["loc",[null,[5,0],[9,9]]]]
       ],
       locals: [],
-      templates: []
+      templates: [child0]
     };
   }()));
 
@@ -2278,7 +2346,7 @@ define('whatslit/tests/authenticators/django.jshint', function () {
 
   QUnit.module('JSHint - authenticators');
   QUnit.test('authenticators/django.js should pass jshint', function(assert) { 
-    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 6, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 10, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 19, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 33, col 22, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 42, col 17, Bad line breaking before \'||\'.\n\n7 errors'); 
+    assert.ok(false, 'authenticators/django.js should pass jshint.\nauthenticators/django.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 4, col 1, \'export\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 6, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 10, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 19, col 3, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nauthenticators/django.js: line 33, col 22, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\nauthenticators/django.js: line 46, col 17, Bad line breaking before \'||\'.\n\n7 errors'); 
   });
 
 });
@@ -3082,7 +3150,7 @@ define('whatslit/tests/routes/index.jshint', function () {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/index.js should pass jshint', function(assert) { 
-    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 3, col 1, \'const\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 3, col 1, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 6, col 1, \'export\' is only available in ES6 (use esnext option).\nroutes/index.js: line 10, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 18, col 30, \'spread/rest operator\' is only available in ES6 (use esnext option).\n\n6 errors'); 
+    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/index.js: line 3, col 1, \'const\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 3, col 1, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 6, col 1, \'export\' is only available in ES6 (use esnext option).\nroutes/index.js: line 10, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\nroutes/index.js: line 18, col 30, \'spread/rest operator\' is only available in ES6 (use esnext option).\nroutes/index.js: line 22, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n7 errors'); 
   });
 
 });
@@ -3113,6 +3181,16 @@ define('whatslit/tests/routes/signup.jshint', function () {
   QUnit.module('JSHint - routes');
   QUnit.test('routes/signup.js should pass jshint', function(assert) { 
     assert.ok(false, 'routes/signup.js should pass jshint.\nroutes/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/signup.js: line 2, col 1, \'import\' is only available in ES6 (use esnext option).\nroutes/signup.js: line 5, col 1, \'export\' is only available in ES6 (use esnext option).\n\n3 errors'); 
+  });
+
+});
+define('whatslit/tests/serializers/user.jshint', function () {
+
+  'use strict';
+
+  QUnit.module('JSHint - serializers');
+  QUnit.test('serializers/user.js should pass jshint', function(assert) { 
+    assert.ok(false, 'serializers/user.js should pass jshint.\nserializers/user.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\nserializers/user.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
   });
 
 });
@@ -3466,7 +3544,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","ENDPOINTS":{"user":"http://localhost:5000/users/"},"name":"whatslit","version":"0.0.0+0d6eaf25","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_NAMESPACE":"","API_HOST":"http://localhost:5000","ENDPOINTS":{"user":"http://localhost:5000/users/"},"name":"whatslit","version":"0.0.0+2e207c88","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */
