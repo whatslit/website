@@ -34,9 +34,13 @@ export default Base.extend({
           //ON SUCCCESS (probably the token)
   	      resolve(response);
 
+
   	    });
   	  }, function(xhr, status, error) {
   	    Ember.run(function() {
+
+
+
           //ON FAILURE
   	      reject(xhr.responseJSON 
   	      	|| error);

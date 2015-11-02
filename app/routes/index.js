@@ -17,6 +17,10 @@ export default Ember.Route.extend({
 	    } else {
 	      return this._super(...arguments);
 	    }
+	},
+
+	model(){
+		return this.store.findAll('user');
 	}
 
 });
