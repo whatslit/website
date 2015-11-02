@@ -1866,7 +1866,7 @@ define('whatslit/tests/components/events-map.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/events-map.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/events-map.js should pass jshint.\ncomponents/events-map.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 10, col 35, Missing semicolon.\n\n3 errors'); 
+    assert.ok(false, 'components/events-map.js should pass jshint.\ncomponents/events-map.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/events-map.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\n\n2 errors'); 
   });
 
 });
@@ -2973,7 +2973,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+e1eec641","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+7ad70987","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */

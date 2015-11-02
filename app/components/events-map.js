@@ -7,6 +7,6 @@ export default Ember.Component.extend({
             scrollwheel: false,
             zoom: 8
         });
-        console.log('loading map')
+        console.log('loading map');
     }.on('mapMade')
 });
