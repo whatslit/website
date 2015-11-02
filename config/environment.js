@@ -22,6 +22,7 @@ module.exports = function(environment) {
     },
   };
 
+  ENV.APP.API_NAMESPACE = '';
   //IFF DEV WITH FRIENDS
   if (environment === 'landev')
       ENV.APP.API_HOST = 'http://192.168.1.2:5000';
