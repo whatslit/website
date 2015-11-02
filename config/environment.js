@@ -1,65 +1,52 @@
 /* jshint node: true */
 
 module.exports = function(environment) {
+  //DEFINE THE ENV.
   var ENV = {
     modulePrefix: 'whatslit',
     environment: environment,
     baseURL: '/',
     locationType: 'auto',
     EmberENV: {
-      FEATURES: {
-        // Here you can enable experimental features on an ember canary build
-        // e.g. 'with-controller': true
-      }
+      FEATURES: {}
     },
-
-    APP: {
-      // Here you can pass flags/options to your application instance
-      // when it is created
-    },
-     contentSecurityPolicy: {
+    APP: {},
+    contentSecurityPolicy: {
       'default-src': "'none'",
       'script-src': "'self' 'unsafe-inline' 'unsafe-eval' use.typekit.net connect.facebook.net maps.googleapis.com maps.gstatic.com",
       'font-src': "'self' data: use.typekit.net",
       'connect-src': "'self' 192.168.1.7 api.whatslit.io  192.168.1.7:5000 localhost:5000", //Questionable?
-      'img-src': "'self' www.facebook.com ",
+      'img-src': "'self' www.facebook.com csi.gstatic.com maps.googleapis.com data:",
       'style-src': "'self' 'unsafe-inline'",
       'frame-src': "s-static.ak.facebook.com static.ak.facebook.com www.facebook.com"
     },
   };
 
+  //IFF DEV WITH FRIENDS
+  if (environment === 'landev')
+      ENV.APP.API_HOST = 'http://192.168.1.7:5000';
+  //IFF DEV ALONE
+  if(environment === 'development')
+      ENV.APP.API_HOST = 'http://localhost:5000';
+  //IFF PRODUCTION
+  if (environment === 'production')
+    ENV.APP.API_HOST = 'http://api.whatslit.io';
 
-  ENV['ember-simple-auth'] = {
-  authenticationRoute: 'sign-in'
+  //SETUP API ENDPOINTS
+  ENV.APP.ENDPOINTS = {
+    user: ENV.APP.API_HOST + '/users/'
   };
 
-  if (environment === 'landev') {
-    // ENV.APP.LOG_RESOLVER = true;
-    // ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
-    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    // ENV.APP.LOG_VIEW_LOOKUPS = true;
-      ENV.APP.API_HOST = 'http://192.168.1.7:5000';
-      ENV['ember-simple-auth'] = {
-        authorizer: 'authorizer:django',
-        serverTokenEndpoint: 'http://192.168.1.7:5000/api-token-auth/',
-        crossOriginWhitelist: ['http://192.168.1.7:5000']
-      };
-  }
+  //SETUP SIMPLE AUTH.
+  ENV['ember-simple-auth'] = {
+    authenticationRoute: 'sign-in',
+    authorizer: 'authorizer:django',
+    serverTokenEndpoint: ENV.APP.API_HOST + '/api-token-auth/',
+    crossOriginWhitelist: [ENV.APP.API_HOST]
+  };
 
-  if(environment === 'development'){
-    // ENV.APP.LOG_RESOLVER = true;
-    // ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
-    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    // ENV.APP.LOG_VIEW_LOOKUPS = true;
-      ENV.APP.API_HOST = 'http://localhost:5000';
-      ENV['ember-simple-auth'] = {
-        authorizer: 'authorizer:django',
-        serverTokenEndpoint: 'http://localhost:5000/api-token-auth/',
-        crossOriginWhitelist: ['http://localhost:5000']
-      };
-  }
+
+  
 
   if (environment === 'test') {
     // Testem prefers this...
@@ -74,14 +61,6 @@ module.exports = function(environment) {
   }
 
 
-  if (environment === 'production') {
-    ENV.APP.API_HOST = 'http://api.whatslit.io';
-    ENV['ember-simple-auth'] = {
-      authorizer: 'authorizer:django',
-      serverTokenEndpoint: 'http://api.whatslit.io/api-token-auth/',
-      crossOriginWhitelist: ['http://api.whatslit.io']
-    };
-  }
 
   return ENV;
 };
