@@ -91,7 +91,6 @@ define('whatslit/authenticators/django', ['exports', 'ember-simple-auth/authenti
     invalidate: function invalidate() {
       function success(resolve) {
         resolve();
-        //TODO: clear token online if needed.
       }
       return new Ember.RSVP.Promise(function (resolve, reject) {
         success(resolve);
@@ -153,25 +152,23 @@ define('whatslit/components/login-form', ['exports', 'ember'], function (exports
 	exports['default'] = Ember['default'].Component.extend({
 			session: Ember['default'].inject.service('session'),
 
+			/* Actions for the login form */
 			actions: {
+					/* Authenticates the user */
 					authenticate: function authenticate() {
 							var _this = this;
 
-							var _getProperties = this.getProperties('identification', 'password');
+							var data = this.getProperties('username', 'password');
 
-							var identification = _getProperties.identification;
-							var password = _getProperties.password;
-
-							var options = { identification: identification, password: password };
-
-							this.get('session').authenticate('authenticator:django', options).then(function () {
+							this.get('session').authenticate('authenticator:django', {
+									identification: data.username,
+									password: data.password
+							}).then(function () {
 									//ON SUCCESS
 									//Clear error messages.
 									_this.set('loginError', null);
 									_this.set('passwordError', null);
 									_this.set('errorMessages', null);
-
-									console.log(_this.get('session.data'));
 							})['catch'](function (reason) {
 									//ON ERROR
 
@@ -240,8 +237,62 @@ define('whatslit/controllers/signup', ['exports', 'ember'], function (exports, E
 	'use strict';
 
 	exports['default'] = Ember['default'].Controller.extend({
+		/*
+	  * THe ember session.
+	  */
+		session: Ember['default'].inject.service('session'),
+
+		/* Initializes the api user endpoint */
+		init: function init() {
+			this.apiUserEndpoint = window.ENV.APP.ENDPOINTS.user;
+		},
+
+		/* The actions for the controller */
 		actions: {
-			register: function register() {}
+			/*
+	   * Registers a user by making a POST request to the API.
+	   */
+			register: function register() {
+				var _this2 = this;
+
+				var _this = this;
+				var data = this.getProperties("username", "email", "password");
+				data.events = [];
+
+				//Send request.
+				Ember['default'].$.ajax({
+					url: _this.apiUserEndpoint,
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					timeout: 3000,
+					contentType: 'application/x-www-form-urlencoded'
+				}).then(function (resp, textStatus, jqXHR) {
+					_this.get('session').authenticate('authenticator:django', {
+						identification: data.username,
+						password: data.password
+					});
+				}, function (jqXHR, textStatus, errorThrown) {
+					var reason = jqXHR.responseJSON || errorThrown;
+
+					//SET ERROR TEXTS!
+					if (reason == "timeout") _this2.set('errorMessages', ["Connection to server timed out! ABORT."]);else {
+						//In the case that a legitmate error has been received.
+						_this2.set('usernameError', null);
+						_this2.set('emailError', null);
+						_this2.set('passwordError', null);
+						_this2.set('errorMessages', null);
+
+						if (reason.username) _this2.set('usernameError', reason.username[0]);
+
+						if (reason.email) _this2.set('emailError', reason.email[0]);
+
+						if (reason.password) _this2.set('passwordError', reason.password[0]);
+
+						if (reason.non_field_errors) _this2.set('errorMessages', reason.non_field_errors);
+					}
+				});
+			}
 		}
 	});
 
@@ -1093,7 +1144,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         var el3 = dom.createTextNode("\n    ");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("label");
-        dom.setAttribute(el3,"for","identification");
+        dom.setAttribute(el3,"for","username");
         var el4 = dom.createTextNode("\n      Login\n");
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("");
@@ -1160,7 +1211,7 @@ define('whatslit/templates/components/login-form', ['exports'], function (export
         ["element","action",["authenticate"],["on","submit"],["loc",[null,[2,6],[2,43]]]],
         ["block","if",[["get","errorMessages",["loc",[null,[3,8],[3,21]]]]],[],0,null,["loc",[null,[3,2],[10,9]]]],
         ["block","if",[["get","loginError",["loc",[null,[15,12],[15,22]]]]],[],1,null,["loc",[null,[15,6],[17,13]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[19,18],[19,32]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[19,4],[19,81]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","username",["loc",[null,[19,18],[19,26]]]]],[],[]],"placeholder","Enter Login","class","form-control"],["loc",[null,[19,4],[19,75]]]],
         ["block","if",[["get","passwordError",["loc",[null,[24,12],[24,25]]]]],[],2,null,["loc",[null,[24,6],[26,13]]]],
         ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[28,18],[28,26]]]]],[],[]],"placeholder","Enter Password","class","form-control","type","password"],["loc",[null,[28,4],[28,94]]]]
       ],
@@ -1942,54 +1993,10 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
             "source": null,
             "start": {
               "line": 13,
-              "column": 10
-            },
-            "end": {
-              "line": 15,
-              "column": 10
-            }
-          },
-          "moduleName": "whatslit/templates/signup.hbs"
-        },
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("            ");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createElement("code");
-          var el2 = dom.createComment("");
-          dom.appendChild(el1, el2);
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
-          return morphs;
-        },
-        statements: [
-          ["content","emailError",["loc",[null,[14,18],[14,32]]]]
-        ],
-        locals: [],
-        templates: []
-      };
-    }());
-    var child2 = (function() {
-      return {
-        meta: {
-          "revision": "Ember@1.13.7",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 22,
               "column": 8
             },
             "end": {
-              "line": 24,
+              "line": 15,
               "column": 8
             }
           },
@@ -2016,7 +2023,51 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
           return morphs;
         },
         statements: [
-          ["content","nameError",["loc",[null,[23,16],[23,29]]]]
+          ["content","usernameError",["loc",[null,[14,16],[14,33]]]]
+        ],
+        locals: [],
+        templates: []
+      };
+    }());
+    var child2 = (function() {
+      return {
+        meta: {
+          "revision": "Ember@1.13.7",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 22,
+              "column": 10
+            },
+            "end": {
+              "line": 24,
+              "column": 10
+            }
+          },
+          "moduleName": "whatslit/templates/signup.hbs"
+        },
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("            ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("code");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
+          return morphs;
+        },
+        statements: [
+          ["content","emailError",["loc",[null,[23,18],[23,32]]]]
         ],
         locals: [],
         templates: []
@@ -2066,50 +2117,6 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
         templates: []
       };
     }());
-    var child4 = (function() {
-      return {
-        meta: {
-          "revision": "Ember@1.13.7",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 41,
-              "column": 8
-            },
-            "end": {
-              "line": 43,
-              "column": 8
-            }
-          },
-          "moduleName": "whatslit/templates/signup.hbs"
-        },
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("          ");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createElement("code");
-          var el2 = dom.createComment("");
-          dom.appendChild(el1, el2);
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]),0,0);
-          return morphs;
-        },
-        statements: [
-          ["content","confPasswordError",["loc",[null,[42,16],[42,37]]]]
-        ],
-        locals: [],
-        templates: []
-      };
-    }());
     return {
       meta: {
         "revision": "Ember@1.13.7",
@@ -2120,7 +2127,7 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 52,
+            "line": 42,
             "column": 0
           }
         },
@@ -2136,7 +2143,29 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
         dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("    ");
+        var el2 = dom.createTextNode("      ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","form-group");
+        var el3 = dom.createTextNode("\n      ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("label");
+        dom.setAttribute(el3,"for","username");
+        var el4 = dom.createTextNode("\n        Username:\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("      ");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n      ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createComment("");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n    ");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n    ");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("div");
         dom.setAttribute(el2,"class","form-group");
@@ -2165,28 +2194,6 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
         var el3 = dom.createTextNode("\n      ");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("label");
-        dom.setAttribute(el3,"for","identification");
-        var el4 = dom.createTextNode("\n        Username:\n");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createComment("");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("      ");
-        dom.appendChild(el3, el4);
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n      ");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n    ");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n    ");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("div");
-        dom.setAttribute(el2,"class","form-group");
-        var el3 = dom.createTextNode("\n      ");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createElement("label");
         dom.setAttribute(el3,"for","password");
         var el4 = dom.createTextNode("\n        Password:\n");
         dom.appendChild(el3, el4);
@@ -2202,29 +2209,7 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n\n      ");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("div");
-        dom.setAttribute(el2,"class","form-group");
-        var el3 = dom.createTextNode("\n   	 ");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createElement("label");
-        dom.setAttribute(el3,"for","confPassword");
-        var el4 = dom.createTextNode("\n        Confirm Password:\n");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createComment("");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("      ");
-        dom.appendChild(el3, el4);
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n      ");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n\n    ");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n    ");
+        var el2 = dom.createTextNode("\n\n    ");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("button");
         dom.setAttribute(el2,"type","submit");
@@ -2248,8 +2233,7 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
         var element1 = dom.childAt(element0, [3]);
         var element2 = dom.childAt(element0, [5]);
         var element3 = dom.childAt(element0, [7]);
-        var element4 = dom.childAt(element0, [9]);
-        var morphs = new Array(11);
+        var morphs = new Array(9);
         morphs[0] = dom.createElementMorph(element0);
         morphs[1] = dom.createMorphAt(element0,1,1);
         morphs[2] = dom.createMorphAt(dom.childAt(element1, [1]),1,1);
@@ -2258,26 +2242,22 @@ define('whatslit/templates/signup', ['exports'], function (exports) {
         morphs[5] = dom.createMorphAt(element2,3,3);
         morphs[6] = dom.createMorphAt(dom.childAt(element3, [1]),1,1);
         morphs[7] = dom.createMorphAt(element3,3,3);
-        morphs[8] = dom.createMorphAt(dom.childAt(element4, [1]),1,1);
-        morphs[9] = dom.createMorphAt(element4,3,3);
-        morphs[10] = dom.createMorphAt(fragment,2,2,contextualElement);
+        morphs[8] = dom.createMorphAt(fragment,2,2,contextualElement);
         return morphs;
       },
       statements: [
         ["element","action",["register"],["on","submit"],["loc",[null,[1,6],[1,39]]]],
         ["block","if",[["get","errorMessages",["loc",[null,[2,8],[2,21]]]]],[],0,null,["loc",[null,[2,2],[9,9]]]],
-        ["block","if",[["get","emailError",["loc",[null,[13,16],[13,26]]]]],[],1,null,["loc",[null,[13,10],[15,17]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[17,22],[17,36]]]]],[],[]],"placeholder","partier@whatslit.io","class","form-control"],["loc",[null,[17,8],[17,93]]]],
-        ["block","if",[["get","nameError",["loc",[null,[22,14],[22,23]]]]],[],2,null,["loc",[null,[22,8],[24,15]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","identification",["loc",[null,[26,20],[26,34]]]]],[],[]],"placeholder","TurntAF420","class","form-control"],["loc",[null,[26,6],[26,82]]]],
+        ["block","if",[["get","usernameError",["loc",[null,[13,14],[13,27]]]]],[],1,null,["loc",[null,[13,8],[15,15]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","username",["loc",[null,[17,20],[17,28]]]]],[],[]],"placeholder","TurntAF420","class","form-control"],["loc",[null,[17,6],[17,76]]]],
+        ["block","if",[["get","emailError",["loc",[null,[22,16],[22,26]]]]],[],2,null,["loc",[null,[22,10],[24,17]]]],
+        ["inline","input",[],["value",["subexpr","@mut",[["get","email",["loc",[null,[26,22],[26,27]]]]],[],[]],"placeholder","partier@whatslit.io","class","form-control"],["loc",[null,[26,8],[26,84]]]],
         ["block","if",[["get","passwordError",["loc",[null,[31,14],[31,27]]]]],[],3,null,["loc",[null,[31,8],[33,15]]]],
         ["inline","input",[],["value",["subexpr","@mut",[["get","password",["loc",[null,[35,20],[35,28]]]]],[],[]],"placeholder","Password","class","form-control","type","password"],["loc",[null,[35,6],[35,90]]]],
-        ["block","if",[["get","confPasswordError",["loc",[null,[41,14],[41,31]]]]],[],4,null,["loc",[null,[41,8],[43,15]]]],
-        ["inline","input",[],["value",["subexpr","@mut",[["get","confPassword",["loc",[null,[45,20],[45,32]]]]],[],[]],"placeholder","Retype your password","class","form-control","type","password"],["loc",[null,[45,6],[45,106]]]],
-        ["content","outlet",["loc",[null,[51,0],[51,10]]]]
+        ["content","outlet",["loc",[null,[41,0],[41,10]]]]
       ],
       locals: [],
-      templates: [child0, child1, child2, child3, child4]
+      templates: [child0, child1, child2, child3]
     };
   }()));
 
@@ -2328,7 +2308,7 @@ define('whatslit/tests/components/login-form.jshint', function () {
 
   QUnit.module('JSHint - components');
   QUnit.test('components/login-form.js should pass jshint', function(assert) { 
-    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 7, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'let\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 8, col 7, \'destructuring expression\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 22, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 10, col 38, \'object short notation\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 18, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 21, col 50, Missing semicolon.\ncomponents/login-form.js: line 22, col 27, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n10 errors'); 
+    assert.ok(false, 'components/login-form.js should pass jshint.\ncomponents/login-form.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 9, col 5, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncomponents/login-form.js: line 15, col 18, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncomponents/login-form.js: line 21, col 27, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n5 errors'); 
   });
 
 });
@@ -2358,7 +2338,7 @@ define('whatslit/tests/controllers/signup.jshint', function () {
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/signup.js should pass jshint', function(assert) { 
-    assert.ok(false, 'controllers/signup.js should pass jshint.\ncontrollers/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 5, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\n\n3 errors'); 
+    assert.ok(false, 'controllers/signup.js should pass jshint.\ncontrollers/signup.js: line 1, col 1, \'import\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 3, col 1, \'export\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 10, col 7, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncontrollers/signup.js: line 19, col 9, \'concise methods\' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).\ncontrollers/signup.js: line 34, col 45, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\ncontrollers/signup.js: line 40, col 52, \'arrow function syntax (=>)\' is only available in ES6 (use esnext option).\n\n6 errors'); 
   });
 
 });
@@ -3486,7 +3466,7 @@ catch(err) {
 if (runningTests) {
   require("whatslit/tests/test-helper");
 } else {
-  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","name":"whatslit","version":"0.0.0+7ad70987","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
+  require("whatslit/app")["default"].create({"API_HOST":"http://localhost:5000","ENDPOINTS":{"user":"http://localhost:5000/users/"},"name":"whatslit","version":"0.0.0+0d6eaf25","API_NAMESPACE":"api","API_ADD_TRAILING_SLASHES":true});
 }
 
 /* jshint ignore:end */

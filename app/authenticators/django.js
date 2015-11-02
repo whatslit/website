@@ -5,7 +5,7 @@ export default Base.extend({
 
   init() {
     var globalConfig                   = window.ENV['ember-simple-auth'] || {};
-    this.serverTokenEndpoint           = globalConfig.serverTokenEndpoint || '/api-token-auth/';
+    this.serverTokenEndpoint              = globalConfig.serverTokenEndpoint || '/api-token-auth/';
   },
   restore(data) {
     return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -47,7 +47,6 @@ export default Base.extend({
   invalidate: function() {
     function success(resolve) {
       resolve();
-      //TODO: clear token online if needed.
     }
     return new Ember.RSVP.Promise(function(resolve, reject) {
       success(resolve);

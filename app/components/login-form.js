@@ -3,22 +3,21 @@ import Ember from 'ember';
 export default Ember.Component.extend({
   session: Ember.inject.service('session'),
 
+  /* Actions for the login form */
   actions: {
+  	/* Authenticates the user */
     authenticate() {
-      let { identification, password } = this.getProperties('identification', 'password');
+      var data = this.getProperties('username', 'password');
 
-      var options = {identification, password};
-
-
-
-      this.get('session').authenticate('authenticator:django',options)
-      	.then(() => { //ON SUCCESS
+      this.get('session').authenticate('authenticator:django', {
+			identification: data.username,
+			password: data.password
+		}).then(() => { //ON SUCCESS
       		//Clear error messages.
   			this.set('loginError', null);
 			this.set('passwordError', null);
 			this.set('errorMessages', null);
 
-			console.log(this.get('session.data'))
       	}).catch((reason) => { //ON ERROR
 
 	      	if(reason == "timeout")

@@ -7,6 +7,15 @@
       {{/each}}
     </ul>
   {{/if}}
+      <div class="form-group">
+      <label for="username">
+        Username:
+        {{#if usernameError}}
+          <code>{{usernameError}}</code>
+        {{/if}}
+      </label>
+      {{input value=username placeholder='TurntAF420' class='form-control'}}
+    </div>
     <div class="form-group">
         <label for="email">
           Email Address:
@@ -14,16 +23,7 @@
             <code>{{emailError}}</code>
           {{/if}}
         </label>
-        {{input value=identification placeholder='partier@whatslit.io' class='form-control'}}
-    </div>
-    <div class="form-group">
-      <label for="identification">
-        Username:
-        {{#if nameError}}
-          <code>{{nameError}}</code>
-        {{/if}}
-      </label>
-      {{input value=identification placeholder='TurntAF420' class='form-control'}}
+        {{input value=email placeholder='partier@whatslit.io' class='form-control'}}
     </div>
     <div class="form-group">
       <label for="password">
@@ -35,16 +35,6 @@
       {{input value=password placeholder='Password' class='form-control' type='password'}}
 		</div>
 
-      <div class="form-group">
-   	 <label for="confPassword">
-        Confirm Password:
-        {{#if confPasswordError}}
-          <code>{{confPasswordError}}</code>
-        {{/if}}
-      </label>
-      {{input value=confPassword placeholder='Retype your password' class='form-control' type='password'}}
-
-    </div>
     <button type="submit" class="btn btn-default">Sign up</button>
 </form>
 
