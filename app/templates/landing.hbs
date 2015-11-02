@@ -1,21 +1,39 @@
+<div class="container">
+  
+  <!--[if lt IE 9]>
+    <script>
+      document.createElement('video');
+    </script>
+  <![endif]-->
 
-  <header>
-    <div class="jumbotron">
-     <div class="backgroundflame">
-      <div class="container">
-        <div class="row">
-          <div class="col-xs-12">
-            <h1 class="text-center">What's Lit?</h1>
-            <p class="text-center">A Crowdsourced Events Rating. </p>
+  <video autoplay loop preload='none' poster="assets/img/background_small.png" id="bgvid">
+      <source src="assets/video/lights_short.mp4" type="video/mp4">
+  </video>
+  <div class="mobileback"></div>
 
-            <center><img class="img-circle" alt="140x140" style="width: 140px; height: 140px;" src="/assets/img/LIT.jpg" data-holder-rendered="true"></center>
-            <h1></h1>
-            <p class="text-center"><a class="btn btn-primary btn-lg" href="#about-us" role="button">Learn more</a> </p>
+    <header>
+    <div class="col-md-4 right-4"></div>
+    <div class="col-md-4 right-4"></div>
+    <div class="col-md-4 right-4">
+      <div class="jumbotron">
+       <div class="backgroundflame">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-12">
+              <h1 class="text-center">What's Lit?</h1>
+
+              <center><img class="img-circle" alt="140x140" style="width: 140px; height: 140px;" src="/assets/img/LIT.jpg" data-holder-rendered="true"></center>
+              </div>
             </div>
           </div>
         </div>
+
+          {{login-form}}
+
+
       </div>
     </div>
-  </header>
+    </header>
 
-{{login-form}}
+
+</div>
