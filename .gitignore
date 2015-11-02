@@ -12,3 +12,4 @@ common-tmp
 bower_components
 /coverage
 .fuse*
+/dist
