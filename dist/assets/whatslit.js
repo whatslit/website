@@ -1658,7 +1658,7 @@ define('whatslit/templates/landing', ['exports'], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 23,
+            "line": 22,
             "column": 0
           }
         },
@@ -1759,21 +1759,15 @@ define('whatslit/templates/landing', ['exports'], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(2);
+        var morphs = new Array(1);
         morphs[0] = dom.createMorphAt(fragment,3,3,contextualElement);
-        morphs[1] = dom.createMorphAt(fragment,5,5,contextualElement);
         return morphs;
       },
       statements: [
-        ["content","login-form",["loc",[null,[21,0],[21,14]]]],
-        ["content","events-map",["loc",[null,[22,0],[22,14]]]]
+        ["content","login-form",["loc",[null,[21,0],[21,14]]]]
       ],
       locals: [],
       templates: []
