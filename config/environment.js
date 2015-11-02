@@ -13,18 +13,18 @@ module.exports = function(environment) {
     APP: {},
     contentSecurityPolicy: {
       'default-src': "'none'",
-      'script-src': "'self' 'unsafe-inline' 'unsafe-eval' use.typekit.net connect.facebook.net maps.googleapis.com maps.gstatic.com",
-      'font-src': "'self' data: use.typekit.net",
-      'connect-src': "'self' 192.168.1.7 api.whatslit.io  192.168.1.7:5000 localhost:5000", //Questionable?
-      'img-src': "'self' www.facebook.com csi.gstatic.com maps.googleapis.com data:",
-      'style-src': "'self' 'unsafe-inline'",
+      'script-src': "'self' 'unsafe-inline' 'unsafe-eval' use.typekit.net connect.facebook.net *.googleapis.com maps.gstatic.com",
+      'font-src': "'self' data: use.typekit.net fonts.gstatic.com",
+      'connect-src': "'self' 192.168.1.7 api.whatslit.io  192.168.1.7:5000 localhost:5000 maps.gstatic.com", //Questionable?
+      'img-src': "'self' www.facebook.com *.googleapis.com maps.gstatic.com csi.gstatic.com data:",
+      'style-src': "'self' 'unsafe-inline' fonts.googleapis.com maps.gstatic.com",
       'frame-src': "s-static.ak.facebook.com static.ak.facebook.com www.facebook.com"
     },
   };
 
   //IFF DEV WITH FRIENDS
   if (environment === 'landev')
-      ENV.APP.API_HOST = 'http://192.168.1.7:5000';
+      ENV.APP.API_HOST = 'http://192.168.1.2:5000';
   //IFF DEV ALONE
   if(environment === 'development')
       ENV.APP.API_HOST = 'http://localhost:5000';
@@ -44,9 +44,13 @@ module.exports = function(environment) {
     serverTokenEndpoint: ENV.APP.API_HOST + '/api-token-auth/',
     crossOriginWhitelist: [ENV.APP.API_HOST]
   };
+  //GOOGLE MAPS CONFIGURATION
+  ENV.googleMap = {
+
+  };
+  ENV.apiKey = 'AIzaSyBHASkObAjXJ5L2v2thptf6Ne13z20NAoY';
 
 
-  
 
   if (environment === 'test') {
     // Testem prefers this...

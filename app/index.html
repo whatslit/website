@@ -17,17 +17,22 @@
   <body id="page-top">
     <div id='map-entry'></div>
     {{content-for 'body'}}
-    <script>
-        var mapMade = new Event('mapMade');
-        function makeMap(){
-            var map = document.getElementById('map-entry');
-            map.dispatchEvent(mapMade);
-        }
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHASkObAjXJ5L2v2thptf6Ne13z20NAoY&callback=makeMap"></script>
+
+    <!-- The google map api call. Calls 'makeMap' when finished -->
+
     <script src="assets/vendor.js"></script>
     <script src="assets/whatslit.js"></script>
-    <script>jQuery.noConflict();</script>
+    <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHASkObAjXJ5L2v2thptf6Ne13z20NAoY&callback=initMap"></script> -->
+    <!-- <script>
+        var mapMade = new Event('mapMade');
+        var mapLoaded = false; // flag
+        function makeMap(){
+            // var map = document.getElementById('map-entry');
+            // map.dispatchEvent(mapMade);
+            mapLoaded = true;
+        }
+    </script>
+    <script>jQuery.noConflict();</script> -->
 
 
     {{content-for 'body-footer'}}
