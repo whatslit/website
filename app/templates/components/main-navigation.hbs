@@ -2,18 +2,21 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
-        {{#link-to 'index' class="navbar-brand"}}What's Lit?{{/link-to}}  </div>
+        {{#link-to 'index' class="navbar-brand"}}What's Lit?{{/link-to}} </div>
 
       <!-- Navigation -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
           <li>{{#link-to 'index'}}Home{{/link-to}}</li>
           <li>{{#link-to 'about'}}About{{/link-to}}</li>
+          {{#if session.isAuthenticated}}
+              <li>{{#link-to 'profile'}}Profile{{/link-to}}</li>
+          {{else}}
+          {{/if}}
         </ul>
         <ul class="nav navbar-nav navbar-right">
 
           {{#if session.isAuthenticated}}
-              <li>{{#link-to 'profile'}}Profile{{/link-to}}</li>
               <li><a {{action 'invalidateSession'}}>Logout</a></li>
           {{else}}
             <li>{{#link-to 'signup'}}Sign Up{{/link-to}}</li>

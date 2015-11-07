@@ -1,6 +1,15 @@
 <div class="container">
 
+  <!--[if lt IE 9]>
+    <script>
+      document.createElement('video');
+    </script>
+  <![endif]-->
 
+  <video autoplay loop preload='none' poster="assets/img/background_small.png" id="bgvid">
+      <source src="assets/video/lights_short.mp4" type="video/mp4">
+  </video>
+<div class="signup">
   <form {{action 'register' on='submit'}}>
     {{#if errorMessages}}
       <strong> Sign up failed: </strong>
@@ -17,7 +26,7 @@
             <code>{{usernameError}}</code>
           {{/if}}
         </label>
-        {{input value=username placeholder='TurntAF420' class='form-control'}}
+        {{input value=username placeholder='Bruhhhh' class='form-control'}}
       </div>
       <div class="form-group">
           <label for="email">
@@ -43,4 +52,5 @@
 
   {{outlet}}
 
+</div>
 </div>

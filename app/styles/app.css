@@ -8,8 +8,26 @@
     padding-left: 60px;
 }
 
+.container {
+    font-family: 'Coming Soon', cursive;
+}
 
-video#bgvid { 
+.navbar {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.navbar {
+    font-size: 22px;
+    font-family: 'Coming Soon', cursive;
+}
+
+.signup {
+  color: white;
+  font-size: 18px;
+}
+
+video#bgvid {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -21,7 +39,7 @@ video#bgvid {
     -webkit-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
     background: url(img/background_small.png) no-repeat;
-    background-size: cover; 
+    background-size: cover;
 
 }
 
