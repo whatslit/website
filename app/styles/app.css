@@ -1,6 +1,10 @@
 .map-canvas {
-  width: 100%;
+  width: 80%;
   height: 600px;
+}
+
+.body {
+  font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 
 .jumbotron{
@@ -9,9 +13,7 @@
     background-color: #A0CFEC;
 }
 
-.container {
-    font-family: 'Coming Soon', cursive;
-}
+
 
 .navbar {
     background-color: transparent;
@@ -20,7 +22,6 @@
 
 .navbar {
     font-size: 22px;
-    font-family: 'Coming Soon', cursive;
 }
 
 .signup {
