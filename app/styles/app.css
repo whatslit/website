@@ -7,13 +7,16 @@
   font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 
+
 .jumbotron{
     padding-right: 60px;
     padding-left: 60px;
     background-color: #A0CFEC;
 }
 
-
+.h4 {
+  padding-top: 100px;
+}
 
 .navbar {
     background-color: transparent;
